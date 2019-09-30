@@ -1,4 +1,4 @@
-# MediStormSeeker
+# Weather Labelling Web Application
 
 This software allows to identify different sensitive weather event in the Mediterranean Sea; in fact you will be able to locate a storm with a specific polygon. This polygon will have its own pop-up where insert a specific weather label on leaflet map. 
 The user can watch different parameters :
