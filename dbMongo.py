@@ -39,8 +39,21 @@ class ManageDB(object):
 
     def deletePolygonDB(self,id):
         """This method allows to remove polygon"""
-        result1 = self.db.PolygonCollection.delete_one({"_id":ObjectId(id)})
-        print("Number polygon removed {}".format(result1.deleted_count))
+        count = self.db.PolygonCollection.count({"_id":ObjectId(id)})
+        print(count)
+        if count == 1:
+            result1 = self.db.PolygonCollection.delete_one({"_id":ObjectId(id)})
+            print("Number polygon removed {}".format(result1.deleted_count))
+            result = "correct"
+            return result
+        elif count == 0:
+            print("polygon already removed")
+            result = "empty"
+            return result
+        else:
+            print("error: DB inconsistent")
+            result = "inconsistent"
+            return result
 
     def deletePolygonDBonUsername(self,username):
         """This method allows to remove all polygon of username"""
@@ -59,10 +72,26 @@ class ManageDB(object):
             cursorListPolygon = None
             return result,cursorListPolygon
 
+    def checkLabelPolygononIdDB(self,id):
+        count = self.db.PolygonCollection.find({"_id": ObjectId(id)}).count()
+        if(count == 1):
+            cursorPolygon = self.db.PolygonCollection.find_one({"_id": ObjectId(id)})
+            result1 = "correct"
+            return count,result1,cursorPolygon
+        elif(count == 0):
+            result1 = "empty"
+            cursorPolygon = None
+            return count, result1, cursorPolygon
+        else:
+            result1 = "inconsistent"
+            cursorPolygon = None
+            return count, result1, cursorPolygon
+
     def modifyLabelPolygonOnIdDB(self,id,name):
         """This method allows to modify polygon's label"""
         result1 = self.db.PolygonCollection.update_one({"_id":ObjectId(id)},{"$set":{"properties.name":name}})
         print("Number polygon modified {}".format(result1.modified_count))
+
 
     def getPolygonOnDate(self,date1):
         """This method allows to get a specific polygon"""
