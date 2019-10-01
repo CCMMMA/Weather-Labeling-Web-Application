@@ -2,7 +2,6 @@
 
 from myfunction import *
 import datetime
-from flask_user import roles_required
 import os
 
 #these values allows to insert the default labels
@@ -13,15 +12,15 @@ app = Flask(__name__)
 app.secret_key = 'Your_secret_string'
 admin = Admin(app,"Admin Area")
 admin.add_view(UserView(managedb.db.UserCollection,"User Management"))
+data = {'flag': 'true'}
 
 @app.route("/")
 def index():
     """This function allows to execute the login; if user is already logged in , he will able to access the main page"""
-    data = {'flag': 'true'}
     if "logged_in" in session and session["logged_in"] == True:
         print("User login",session["username"])
         return render_template('main.html',data=data)
-    return render_template('index.html',data=data)
+    return render_template('loginPage.html',data=data)
 
 # @app.route("/main")
 # def main():
@@ -37,7 +36,7 @@ def home():
     if "logged_in" in session and session["logged_in"] == True:
         print("User login",session["username"])
         return render_template('/admin/index.html')
-    return render_template('index.html')
+    return redirect(url_for('index'))
 
 
 @app.route("/registration")
@@ -167,8 +166,13 @@ def deleteStorm():
         idDB = request.form['id']
         print("Polygon to be deleted with idDB",idDB)
         try:
-            managedb.deletePolygonDB(idDB)
-            return json.dumps({"result":"correct"})
+            result = managedb.deletePolygonDB(idDB)
+            if result == "correct":
+                return json.dumps({"result":"correct"})
+            elif result == "empty":
+                return json.dumps({"result": "empty"})
+            else:
+                return json.dumps({"result": "inconsistent"})
         except Exception as e:
             print("exception error DB ",str(e))
             return json.dumps({"result" : "error"})
@@ -254,6 +258,29 @@ def insertLabelsOnIdDB():
         except Exception as e:
             print("exception error DB", str(e))
             return json.dumps({"result": "error"})
+
+
+@app.route('/checkLabel',methods=["GET","POST"])
+def checkLabel():
+    """This function allows to change the label of a polygon"""
+    if request.is_xhr and request.method=="POST":
+        idDB = request.form["id"]
+        #print("modifica label del Polygon con idDB",idDB)
+        #print("nuova etichetta",name)
+        try:
+            count,result1,cursorPolygon = managedb.checkLabelPolygononIdDB(idDB)
+            if(count == 1):
+                result2 = {"result":"correct","label":cursorPolygon["properties"]["name"]}
+                print result2
+                return result2
+            elif(count == 0):
+                return json.dumps({"result": "empty"})
+            else:
+                return json.dumps({"result": "inconsistent"})
+        except Exception as e:
+            print("exception error DB111",str(e))
+            return json.dumps({"result": "error"})
+
 
 @app.route('/modifyLabel',methods=["GET","POST"])
 def modifyLabel():
