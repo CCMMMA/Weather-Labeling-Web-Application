@@ -1,5 +1,5 @@
 """This file helps mainly to trasform data from db in JSON using MyTools class"""
-from shapely.geometry import Point, Polygon
+
 from manager import *
 import json
 
@@ -111,4 +111,3 @@ class MyTools(object):
 
 
 mytools = MyTools()
-
