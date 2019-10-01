@@ -8,7 +8,7 @@ from wtforms import form, fields, Form, BooleanField, StringField, PasswordField
 from flask_admin.model.fields import InlineFormField, InlineFieldList
 from flask_admin import Admin, BaseView, expose
 from werkzeug.security import generate_password_hash,check_password_hash
-from flask_security import current_user
+
 
 class UserForm(form.Form):
     name = fields.StringField('name',[validators.required(), validators.length(max=30)])
