@@ -187,6 +187,13 @@ function onEachFeature(f, l) {
                                 //console.log("leafletid removed "+leafletID);
                                 countPolygon--;
                                 //console.log("countPolygon: "+ countPolygon);
+                                if(data.result == "correct"){
+                                    console.log("polygon removed from DB");
+                                }else if(data.result == "empty"){
+                                    console.log("polygon already removed from DB");
+                                }else{
+                                    console.log("error: DB inconsistent");
+                                }
                                 for (let key in groupPolygon) {
                                     groupPolygon[key].group.eachLayer(function (layer) {
                                         let layerJSON = layer.toGeoJSON();
@@ -268,166 +275,403 @@ function onEachFeature(f, l) {
                     $(select0).on('focus', function () {
                         // store the previous value
                         previousValue = this.value;
+
                     }).change(function () {
                         if (previousValue == 0) {
                             previousValue = "";
                         }
+                        let select11 = this;
                         //console.log(this);
                         nextValue = this.value;
                         var element = this;
-                        $.ajax({
-                            url: "{{url_for("modifyLabel")}}",
-                            method: "POST",
-                            data: {"id": f.properties.idDB, "name": this.value},
-                            dataType: "json",
-                            success: function (data) {
-                                if (data.result == "correct") {
-                                    //console.log(element.value);
-                                    $(element).prev().html(element.value);
+                        $.ajax({url: "{{url_for("checkLabel")}}",
+                            method:"POST",
+                            data:{"id":f.properties.idDB},
+                            dataType:"json",
+                            success:function(data) {
+                                console.log(data.result);
+                                if(data.result == "correct"){
+                                    console.log(previousValue + " e " + data.label);
+                                    console.log(nextValue + " e " + data.label);
+                                    if(previousValue == data.label || nextValue == data.label){
+                                        console.log("updated");
+                                        $.ajax({
+                                            url: "{{url_for("modifyLabel")}}",
+                                            method: "POST",
+                                            data: {"id": f.properties.idDB, "name": nextValue},
+                                            dataType: "json",
+                                            success: function (data) {
+                                                if (data.result == "correct") {
+                                                    //console.log(element.value);
+                                                    $(element).prev().html(element.value);
 
-                                    //In this success function a layer will change his own group;
-                                    //therefore this layer will be removed from previous polygon's group and layer control,
-                                    // then this one will be added next polygon's group and layer control.
-                                    // The mongo id (idDB) will be used to identify a specific layer
+                                                    //In this success function a layer will change his own group;
+                                                    //therefore this layer will be removed from previous polygon's group and layer control,
+                                                    // then this one will be added next polygon's group and layer control.
+                                                    // The mongo id (idDB) will be used to identify a specific layer
 
-                                    //Removal step
+                                                    //Removal step
 
-                                    for (let key in groupPolygon) {
-                                        if (groupPolygon[key]["name"] == previousValue) {
+                                                    for (let key in groupPolygon) {
+                                                        if (groupPolygon[key]["name"] == previousValue) {
 
-                                            if (groupPolygon[key].count == 1) {
+                                                            if (groupPolygon[key].count == 1) {
 
-                                                groupPolygon[key].group.eachLayer(function (layer) {
-                                                    let layerJSON = layer.toGeoJSON();
-                                                    //console.log(layerJSON);
-                                                    //console.log("id "+ f.properties.idDB);
-                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
-                                                    let idDB1 = f.properties.idDB;
-                                                    let idDB2;
-                                                    //console.log(idDB1);
-                                                    try {
-                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
-                                                        //console.log(idDB2);
-                                                    } catch (err) {
-                                                        //console.log(err);
-                                                        idDB2 = layerJSON["properties"]["idDB"];
-                                                        //console.log(idDB2);
+                                                                groupPolygon[key].group.eachLayer(function (layer) {
+                                                                    let layerJSON = layer.toGeoJSON();
+                                                                    //console.log(layerJSON);
+                                                                    //console.log("id "+ f.properties.idDB);
+                                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                                    let idDB1 = f.properties.idDB;
+                                                                    let idDB2;
+                                                                    //console.log(idDB1);
+                                                                    try {
+                                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    } catch (err) {
+                                                                        //console.log(err);
+                                                                        idDB2 = layerJSON["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    }
+                                                                    //console.log(idDB1 + " " + idDB2);
+                                                                    if (idDB1 == idDB2) {
+                                                                        groupPolygon[key].group.removeLayer(layer);
+                                                                        layerControl1.removeLayer(groupPolygon[key].group);
+                                                                        groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                                        //console.log("groupPolygon");
+                                                                        //console.log(groupPolygon);
+                                                                    }
+                                                                });
+                                                            } else if (groupPolygon[key].count > 1) {
+                                                                groupPolygon[key].group.eachLayer(function (layer) {
+                                                                    let layerJSON = layer.toGeoJSON();
+                                                                    //console.log(layerJSON);
+                                                                    //console.log("id "+ f.properties.idDB);
+                                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                                    let idDB1 = f.properties.idDB;
+                                                                    let idDB2;
+                                                                    //console.log(idDB1);
+                                                                    try {
+                                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    } catch (err) {
+                                                                        idDB2 = layerJSON["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    }
+                                                                    //console.log(idDB1 + " " + idDB2);
+                                                                    if (idDB1 == idDB2) {
+                                                                        groupPolygon[key].group.removeLayer(layer);
+                                                                        groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                                    }
+                                                                });
+                                                            } else if (groupPolygon[key].count <= 0) {
+
+                                                                groupPolygon[key].group.eachLayer(function (layer) {
+                                                                    let layerJSON = layer.toGeoJSON();
+                                                                    //console.log(layerJSON);
+                                                                    //console.log("id "+ f.properties.idDB);
+                                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                                    let idDB1 = f.properties.idDB;
+                                                                    let idDB2;
+                                                                    //console.log(idDB1);
+                                                                    try {
+                                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    } catch (err) {
+                                                                        //console.log(err);
+                                                                        idDB2 = layerJSON["properties"]["idDB"];
+                                                                        //console.log(idDB2);
+                                                                    }
+                                                                    //console.log(idDB1 + " " + idDB2);
+                                                                    if (idDB1 == idDB2) {
+                                                                        groupPolygon[key].group.removeLayer(layer);
+                                                                        layerControl1.removeLayer(groupPolygon[key].group);
+                                                                        groupPolygon[key].count = 0;
+                                                                        //console.log("groupPolygon");
+                                                                        //console.log(groupPolygon);
+                                                                    }
+                                                                });
+
+                                                            }
+                                                        }
                                                     }
-                                                    //console.log(idDB1 + " " + idDB2);
-                                                    if (idDB1 == idDB2) {
-                                                        groupPolygon[key].group.removeLayer(layer);
-                                                        layerControl1.removeLayer(groupPolygon[key].group);
-                                                        groupPolygon[key].count = groupPolygon[key].count - 1;
-                                                        //console.log("groupPolygon");
-                                                        //console.log(groupPolygon);
-                                                    }
-                                                });
-                                            } else if (groupPolygon[key].count > 1) {
-                                                groupPolygon[key].group.eachLayer(function (layer) {
-                                                    let layerJSON = layer.toGeoJSON();
-                                                    //console.log(layerJSON);
-                                                    //console.log("id "+ f.properties.idDB);
-                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
-                                                    let idDB1 = f.properties.idDB;
-                                                    let idDB2;
-                                                    //console.log(idDB1);
-                                                    try {
-                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
-                                                        //console.log(idDB2);
-                                                    } catch (err) {
-                                                        idDB2 = layerJSON["properties"]["idDB"];
-                                                        //console.log(idDB2);
-                                                    }
-                                                    //console.log(idDB1 + " " + idDB2);
-                                                    if (idDB1 == idDB2) {
-                                                        groupPolygon[key].group.removeLayer(layer);
-                                                        groupPolygon[key].count = groupPolygon[key].count - 1;
-                                                    }
-                                                });
-                                            } else if (groupPolygon[key].count <= 0) {
 
-                                                groupPolygon[key].group.eachLayer(function (layer) {
-                                                    let layerJSON = layer.toGeoJSON();
-                                                    //console.log(layerJSON);
-                                                    //console.log("id "+ f.properties.idDB);
-                                                    //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
-                                                    let idDB1 = f.properties.idDB;
-                                                    let idDB2;
-                                                    //console.log(idDB1);
-                                                    try {
-                                                        idDB2 = layerJSON["features"][0]["properties"]["idDB"];
-                                                        //console.log(idDB2);
-                                                    } catch (err) {
-                                                        //console.log(err);
-                                                        idDB2 = layerJSON["properties"]["idDB"];
-                                                        //console.log(idDB2);
+                                                    //Insertion step
+                                                    let flag1 = false;
+                                                    for (let key in groupPolygon) {
+                                                        if (groupPolygon[key]["name"] == nextValue) {
+                                                            flag1 = true;
+                                                            groupPolygon[key]["group"].addLayer(l).addTo(map.map);
+                                                            if (groupPolygon[key].count == 0) {
+                                                                groupPolygon[key].count = groupPolygon[key].count + 1;
+                                                                let a = groupPolygon[key]["name"];
+                                                                if (a == "") {
+                                                                    a = "NO LABEL".toUpperCase();
+                                                                }
+                                                                let b = groupPolygon[key]["count"];
+                                                                let c = groupPolygon[key]["group"]._leaflet_id;
+                                                                let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                                                                layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                                            } else if (groupPolygon[key].count > 0) {
+                                                                groupPolygon[key].count = groupPolygon[key].count + 1;
+                                                            }
+                                                        }
                                                     }
-                                                    //console.log(idDB1 + " " + idDB2);
-                                                    if (idDB1 == idDB2) {
-                                                        groupPolygon[key].group.removeLayer(layer);
-                                                        layerControl1.removeLayer(groupPolygon[key].group);
-                                                        groupPolygon[key].count = 0;
-                                                        //console.log("groupPolygon");
-                                                        //console.log(groupPolygon);
+                                                    if (!flag1) {
+                                                        let a = {
+                                                            "name": nextValue,
+                                                            "count": 1,
+                                                            "group": L.layerGroup()
+                                                        };
+                                                        //console.log(a);
+                                                        groupPolygon.push(a);
+                                                        for (let key in groupPolygon) {
+                                                            if (groupPolygon[key]["name"] == nextValue) {
+
+                                                                groupPolygon[key]["group"].addLayer(l);
+                                                                groupPolygon[key]["group"].addTo(map.map);
+
+                                                                let a = groupPolygon[key]["name"];
+                                                                if (a == "") {
+                                                                    a = "NO LABEL".toUpperCase();
+                                                                }
+                                                                let b = groupPolygon[key]["count"];
+                                                                let c = groupPolygon[key]["group"]._leaflet_id;
+                                                                let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                                                                layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                                            }
+                                                        }
                                                     }
-                                                });
-
-                                            }
-                                        }
-                                    }
-
-                                    //Insertion step
-                                    let flag1 = false;
-                                    for (let key in groupPolygon) {
-                                        if (groupPolygon[key]["name"] == nextValue) {
-                                            flag1 = true;
-                                            groupPolygon[key]["group"].addLayer(l).addTo(map.map);
-                                            if (groupPolygon[key].count == 0) {
-                                                groupPolygon[key].count = groupPolygon[key].count + 1;
-                                                let a = groupPolygon[key]["name"];
-                                                if (a == "") {
-                                                    a = "NO LABEL".toUpperCase();
                                                 }
-                                                let b = groupPolygon[key]["count"];
-                                                let c = groupPolygon[key]["group"]._leaflet_id;
-                                                let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
-                                                layerControl1.addOverlay(groupPolygon[key]["group"], name1);
-                                            } else if (groupPolygon[key].count > 0) {
-                                                groupPolygon[key].count = groupPolygon[key].count + 1;
                                             }
-                                        }
-                                    }
-                                    if (!flag1) {
-                                        let a = {
-                                            "name": nextValue,
-                                            "count": 1,
-                                            "group": L.layerGroup()
-                                        };
-                                        //console.log(a);
-                                        groupPolygon.push(a);
+                                        });
+                                    }else{
+                                        console.log("label not updated;update!");
+                                        alert("label not updated;update!");
+                                        //console.log(element.value);
+                                        let updateValue = data.label;
+                                        $(element).prev().html(updateValue);
+
+                                        //In this success function a layer will change his own group;
+                                        //therefore this layer will be removed from previous polygon's group and layer control,
+                                        // then this one will be added next polygon's group and layer control.
+                                        // The mongo id (idDB) will be used to identify a specific layer
+
+                                        //Removal step
+
                                         for (let key in groupPolygon) {
-                                            if (groupPolygon[key]["name"] == nextValue) {
+                                            if (groupPolygon[key]["name"] == previousValue) {
 
-                                                groupPolygon[key]["group"].addLayer(l);
-                                                groupPolygon[key]["group"].addTo(map.map);
+                                                if (groupPolygon[key].count == 1) {
 
-                                                let a = groupPolygon[key]["name"];
-                                                if (a == "") {
-                                                    a = "NO LABEL".toUpperCase();
+                                                    groupPolygon[key].group.eachLayer(function (layer) {
+                                                        let layerJSON = layer.toGeoJSON();
+                                                        //console.log(layerJSON);
+                                                        //console.log("id "+ f.properties.idDB);
+                                                        //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                        let idDB1 = f.properties.idDB;
+                                                        let idDB2;
+                                                        //console.log(idDB1);
+                                                        try {
+                                                            idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        } catch (err) {
+                                                            //console.log(err);
+                                                            idDB2 = layerJSON["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        }
+                                                        //console.log(idDB1 + " " + idDB2);
+                                                        if (idDB1 == idDB2) {
+                                                            groupPolygon[key].group.removeLayer(layer);
+                                                            layerControl1.removeLayer(groupPolygon[key].group);
+                                                            groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                            //console.log("groupPolygon");
+                                                            //console.log(groupPolygon);
+                                                        }
+                                                    });
+                                                } else if (groupPolygon[key].count > 1) {
+                                                    groupPolygon[key].group.eachLayer(function (layer) {
+                                                        let layerJSON = layer.toGeoJSON();
+                                                        //console.log(layerJSON);
+                                                        //console.log("id "+ f.properties.idDB);
+                                                        //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                        let idDB1 = f.properties.idDB;
+                                                        let idDB2;
+                                                        //console.log(idDB1);
+                                                        try {
+                                                            idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        } catch (err) {
+                                                            idDB2 = layerJSON["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        }
+                                                        //console.log(idDB1 + " " + idDB2);
+                                                        if (idDB1 == idDB2) {
+                                                            groupPolygon[key].group.removeLayer(layer);
+                                                            groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                        }
+                                                    });
+                                                } else if (groupPolygon[key].count <= 0) {
+
+                                                    groupPolygon[key].group.eachLayer(function (layer) {
+                                                        let layerJSON = layer.toGeoJSON();
+                                                        //console.log(layerJSON);
+                                                        //console.log("id "+ f.properties.idDB);
+                                                        //console.log("id1 " + layerJSON["features"][0]["properties"]["idDB"]);
+                                                        let idDB1 = f.properties.idDB;
+                                                        let idDB2;
+                                                        //console.log(idDB1);
+                                                        try {
+                                                            idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        } catch (err) {
+                                                            //console.log(err);
+                                                            idDB2 = layerJSON["properties"]["idDB"];
+                                                            //console.log(idDB2);
+                                                        }
+                                                        //console.log(idDB1 + " " + idDB2);
+                                                        if (idDB1 == idDB2) {
+                                                            groupPolygon[key].group.removeLayer(layer);
+                                                            layerControl1.removeLayer(groupPolygon[key].group);
+                                                            groupPolygon[key].count = 0;
+                                                            //console.log("groupPolygon");
+                                                            //console.log(groupPolygon);
+                                                        }
+                                                    });
+
                                                 }
-                                                let b = groupPolygon[key]["count"];
-                                                let c = groupPolygon[key]["group"]._leaflet_id;
-                                                let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
-                                                layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                            }
+                                        }
+
+                                        //Insertion step
+                                        let flag1 = false;
+                                        for (let key in groupPolygon) {
+                                            if (groupPolygon[key]["name"] == updateValue) {
+                                                flag1 = true;
+                                                select0.value = updateValue;
+                                                groupPolygon[key]["group"].addLayer(l).addTo(map.map);
+                                                if (groupPolygon[key].count == 0) {
+                                                    groupPolygon[key].count = groupPolygon[key].count + 1;
+                                                    let a = groupPolygon[key]["name"];
+                                                    if (a == "") {
+                                                        a = "NO LABEL".toUpperCase();
+                                                    }
+                                                    let b = groupPolygon[key]["count"];
+                                                    let c = groupPolygon[key]["group"]._leaflet_id;
+                                                    let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                                                    layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                                } else if (groupPolygon[key].count > 0) {
+                                                    groupPolygon[key].count = groupPolygon[key].count + 1;
+                                                }
+                                            }
+                                        }
+                                        if (!flag1) {
+                                            let a = {
+                                                "name": updateValue,
+                                                "count": 1,
+                                                "group": L.layerGroup()
+                                            };
+                                            //console.log(a);
+                                            groupPolygon.push(a);
+                                            label1.push(updateValue);
+                                            for (let key in groupPolygon) {
+                                                if (groupPolygon[key]["name"] == updateValue) {
+
+
+                                                    let x = div1.childNodes;
+                                                    for (let i = 0; i < x.length; i++) {
+                                                        if (x[i].nodeName == "SELECT") {
+                                                            //console.log(a[i]);
+                                                            //console.log("id "+ a[i].id);
+                                                            let id = x[i].id;
+                                                            for (let i = 0; i < label1.length; i++) {
+                                                                let flag10 = false;
+                                                                $("select#" + id + " option").each(function () {
+                                                                    //console.log(this);
+                                                                    let a = $(this).val();
+
+                                                                    if (label1[i] == a) {
+                                                                        //console.log("element already exists");
+                                                                        flag10 = true;
+                                                                    }
+                                                                });
+                                                                if (!flag10) {
+                                                                    let option = document.createElement('option');
+                                                                    option.value = label1[i].toUpperCase();
+                                                                    option.innerHTML = label1[i].toUpperCase();
+                                                                    $("select#" + id).append(option);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    select0.value = updateValue;
+
+                                                    groupPolygon[key]["group"].addLayer(l);
+                                                    groupPolygon[key]["group"].addTo(map.map);
+
+                                                    let a = groupPolygon[key]["name"];
+                                                    if (a == "") {
+                                                        a = "NO LABEL".toUpperCase();
+                                                    }
+                                                    let b = groupPolygon[key]["count"];
+                                                    let c = groupPolygon[key]["group"]._leaflet_id;
+                                                    let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                                                    layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                                }
                                             }
                                         }
                                     }
+                                }else if(data.result == "empty"){
+
+                                    console.log("the polygon has been deleted;update!");
+                                    alert("the polygon has been deleted;update!");
+                                    let username = f.properties.username;
+                                    console.log(username);
+                                    let idDB = f.properties.idDB;
+                                    let leafletID = l._leaflet_id;
+                                    //console.log("leafletID: " +leafletID);
+                                    //console.log("leafletid removed "+leafletID);
+                                    countPolygon--;
+                                    //console.log("countPolygon: "+ countPolygon);
+                                    for (let key in groupPolygon) {
+                                        groupPolygon[key].group.eachLayer(function (layer) {
+                                            let layerJSON = layer.toGeoJSON();
+                                            let idDB2;
+                                            try {
+                                                idDB2 = layerJSON["features"][0]["properties"]["idDB"];
+                                                //console.log(idDB2);
+                                            } catch (err) {
+                                                //console.log(err);
+                                                idDB2 = layerJSON["properties"]["idDB"];
+                                                //console.log(idDB2);
+                                            }
+                                            //console.log(idDB + " " + idDB2);
+                                            if (idDB == idDB2) {
+                                                //console.log("count before" + groupPolygon[key].count);
+                                                if (groupPolygon[key].count == 1) {
+
+                                                    groupPolygon[key].group.removeLayer(layer);
+                                                    groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                    //console.log("count after " + groupPolygon[key].count);
+                                                    layerControl1.removeLayer(groupPolygon[key].group);
+                                                    if (countPolygon <= 0) {
+                                                        layerControl1.remove(map.map);
+                                                    }
+                                                } else if (groupPolygon[key].count > 1) {
+                                                    groupPolygon[key].group.removeLayer(layer);
+                                                    groupPolygon[key].count = groupPolygon[key].count - 1;
+                                                    //console.log("count after " + groupPolygon[key].count);
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                }else{
+                                    console.log("DB inconsistent");
                                 }
                             }
                         });
                     });
-
-
                     let div1 = document.createElement('div');
                     let pre1 = document.createElement('pre');
                     let pre2 = document.createElement('pre');
@@ -947,7 +1191,14 @@ function updateMap(localPlace,localDate){
                 //console.log("leafletid removed "+leafletID);
                 countPolygon--;
                 //console.log("countPolygon: "+ countPolygon);
-
+                //console.log(data.result);
+                if(data.result == "correct"){
+                    console.log("polygon removed from DB");
+                }else if(data.result == "empty"){
+                    console.log("polygon already removed from DB");
+                }else{
+                    console.log("error: DB inconsistent");
+                }
                 for (let key in groupPolygon) {
                     groupPolygon[key].group.eachLayer(function (layer) {
                         let layerJSON = layer.toGeoJSON();
