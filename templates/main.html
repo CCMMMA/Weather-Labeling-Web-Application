@@ -1138,7 +1138,7 @@ function updateMap(localPlace,localDate){
                         success:function(data) {
                             //the identified layer will be removed from map, then it will be added using geojson
 
-                            if (data.resut == "correct") {
+                            if (data.result == "correct") {
                                 map.map.eachLayer(function (layer) {
                                     if (layer._leaflet_id == leafletID) {
                                         //console.log("layer identified " + leafletID );
