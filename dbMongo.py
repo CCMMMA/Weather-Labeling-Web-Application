@@ -34,7 +34,8 @@ class ManageDB(object):
 
     def insertPolygonDB(self,polygonGeoJson):
         """This method allows to add polygon"""
-        count = self.db.PolygonCollection.find({"geometry.coordinates":polygonGeoJson["geometry"]["coordinates"],"properties.dateStr":polygonGeoJson["properties"]["dateStr"]})
+        count = self.db.PolygonCollection.find({"$and":[{"geometry.coordinates":polygonGeoJson["geometry"]["coordinates"]},{"properties.dateStr":polygonGeoJson["properties"]["dateStr"]}]}).count()
+        print("equal polygons ",count)
         if count == 0:
             id = self.db.PolygonCollection.insert(polygonGeoJson)
             result = True
