@@ -20,13 +20,13 @@ Configuration:
 6. pip install -r requirements.txt
 7. export FLASK_APP=app.py
 8. export FLASK_DEBUG=true
-9. It is necessary to install mongodb and create a collection for users with unique username:
-you type this command "db.UserCollection.createIndex( { "username": 1 }, { unique: true } )"
-10. It's necessary to insert the first admin by mongo's shell:
-for example you could type this command --> db.UserCollection.insert({"name":"YOUR_NAME","surname":"YOUR_SURNAME","username":"YOUR_USERNAME","password":"YOUR_PASSWORD","role":"ADMIN"})
-11. 10.you must create a collection called LabelCollection and typed these commands:
+11. you must execute these commands in mongo shell:
+"db.UserCollection.createIndex( { "username": 1 }, { unique: true } )"
 "db.LabelCollection.createIndex( { "labelId": 1 }, { unique: true } )" ,
 "db.LabelCollection.createIndex( { "labelName": 1 }, { unique: true } )".
+db.PolygonCollection.createIndex({"geometry.coordinates":1,"properties.dateStr":1},{unique:true})
+10. It's necessary to insert the first admin by mongo's shell:
+for example you could type this command --> db.UserCollection.insert({"name":"YOUR_NAME","surname":"YOUR_SURNAME","username":"YOUR_USERNAME","password":"YOUR_PASSWORD","role":"ADMIN"})
 12. You must insert your secret key in views.py --> app.secret_key = 'Your_secret_string' 
 13. flask run --host 0.0.0.0  --port 5555
 14. If you wanted to remove "Uniparthenope" logo you would set flag = false in view.py in function index
