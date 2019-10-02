@@ -24,6 +24,9 @@ Configuration:
 you type this command "db.UserCollection.createIndex( { "username": 1 }, { unique: true } )"
 10. It's necessary to insert the first admin by mongo's shell:
 for example you could type this command --> db.UserCollection.insert({"name":"YOUR_NAME","surname":"YOUR_SURNAME","username":"YOUR_USERNAME","password":"YOUR_PASSWORD","role":"ADMIN"})
-11. You must insert your secret key in views.py --> app.secret_key = 'Your_secret_string' 
-12. flask run --host 0.0.0.0  --port 5555
-13. If you wanted to remove "Uniparthenope" logo you would set flag = false in view.py in function index
+11. 10.you must create a collection called LabelCollection and typed these commands:
+"db.LabelCollection.createIndex( { "labelId": 1 }, { unique: true } )" ,
+"db.LabelCollection.createIndex( { "labelName": 1 }, { unique: true } )".
+12. You must insert your secret key in views.py --> app.secret_key = 'Your_secret_string' 
+13. flask run --host 0.0.0.0  --port 5555
+14. If you wanted to remove "Uniparthenope" logo you would set flag = false in view.py in function index
