@@ -2,6 +2,7 @@
 
 from myfunction import *
 import datetime
+from flask_user import roles_required
 import os
 
 #these values allows to insert the default labels
@@ -17,6 +18,7 @@ data = {'flag': 'true'}
 @app.route("/")
 def index():
     """This function allows to execute the login; if user is already logged in , he will able to access the main page"""
+    global data
     if "logged_in" in session and session["logged_in"] == True:
         print("User login",session["username"])
         return render_template('main.html',data=data)
@@ -152,12 +154,15 @@ def insertStorm():
         #    print(" ")
         #print(type(polygonGeoJson))
         try:
-            id = managedb.insertPolygonDB(polygonGeoJson)
-            #print("Polygon da inserire con idDB:",str(id))
-            return json.dumps({"id":str(id)})
+            result,id = managedb.insertPolygonDB(polygonGeoJson)
+            if result==True:
+                # print("Polygon da inserire con idDB:",str(id))
+                return json.dumps({"result":"correct","id":str(id)})
+            else:
+                return json.dumps({"result": "alreadyinserted"})
         except Exception as e:
             print("exception error DB",str(e))
-            return json.dumps({"id": "error"})
+            return json.dumps({"result": "error"})
 
 @app.route('/deleteStorm',methods=["GET","POST"])
 def deleteStorm():
@@ -206,8 +211,9 @@ def listLabelsOnIdDB():
         global count12
         try:
             count12 = managedb.countLabelDB()
+            print("Label count:", count12)
             if(count12 == 0):
-                print("Label count:",count12)
+
                 flag = True
         except Exception as e:
             print("exception error DB", str(e))
@@ -219,9 +225,13 @@ def listLabelsOnIdDB():
                 labels = ["","Medicane", "Storm", "Thunderstorm"]
                 for l in labels:
                     label = {"labelName": l.upper(),"labelId":count12}
-                    id = managedb.insertLabelDB(label)
-                    #print("Label inserito id:", str(id))
-                    count12 += 1
+                    result15,id = managedb.insertLabelDB(label)
+                    #print(result15,id)
+                    if(result15 == True):
+                        print("Label id:", str(id))
+                        count12 += 1
+                    else:
+                        print("Label already inserted")
             except Exception as e:
                 print("exception error DB", str(e))
                 return json.dumps({"result": "error"})
@@ -251,10 +261,13 @@ def insertLabelsOnIdDB():
         label = {"labelName":l.upper(),"labelId":count12}
         print("Label da inserire,",l.upper(), "labelId",count12)
         try:
-            id = managedb.insertLabelDB(label)
-            print("label id:", str(id))
-            count12 += 1
-            return json.dumps({"result": "correct"})
+            result,id = managedb.insertLabelDB(label)
+            if result == True:
+                print("label id:", str(id))
+                count12 += 1
+                return json.dumps({"result": "correct"})
+            else:
+                return json.dumps({"result": "alreadyinserted"})
         except Exception as e:
             print("exception error DB", str(e))
             return json.dumps({"result": "error"})
