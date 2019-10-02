@@ -242,7 +242,7 @@ function onEachFeature(f, l) {
             data:{"id":f.properties.idDB},
             dataType:"json",
             success:function(data) {
-                if (data.result != "error") {
+                if (data.result != "error" && data.result != "empty") {
                     //console.log(data);
                     let select0 = document.createElement('select');
                     count = count + 1;
@@ -275,6 +275,43 @@ function onEachFeature(f, l) {
                     $(select0).on('focus', function () {
                         // store the previous value
                         previousValue = this.value;
+                        $.ajax({
+                            url: "{{url_for("listLabelsOnIdDB")}}",
+                            method:"POST",
+                            data:{"id":f.properties.idDB},
+                            dataType:"json",
+                            success:function(data){
+                                 if (data.result != "error") {
+                                     //console.log(data);
+                                    for (let i = 0; i < data.length; i++) {
+                                        data[i].labelName = data[i].labelName.toUpperCase();
+                                    }
+                                    for (let i = 0; i < data.length; i++) {
+                                        let flag15 = false;
+                                        for (let j = 0; j < data111.length; j++) {
+                                            if (data[i].labelName == data111[j].labelName.toUpperCase()) {
+                                                flag15 = true;
+                                                console.log("Element already exists");
+                                            }
+                                        }
+                                        for (let j = 0; j < label1.length; j++) {
+                                            //console.log("item in frontend: "+ data111[i].labelName);
+                                            if (data[i].labelName == label1[j].toUpperCase()) {
+                                                flag15 = true;
+                                                console.log("Element already exists");
+                                            }
+                                        }
+                                        if(!flag15){
+                                            let option = document.createElement('option');
+                                            option.value = data[i].labelName;
+                                            option.innerHTML = data[i].labelName;
+                                            select0.appendChild(option);
+                                            label1.push(data[i].labelName);
+                                        }
+                                    }
+                                 }
+                            }
+                        });
 
                     }).change(function () {
                         if (previousValue == 0) {
@@ -696,6 +733,7 @@ function onEachFeature(f, l) {
                         //console.log(label);
                         for (let i = 0; i < data111.length; i++) {
                             if (label == data111[i].labelName.toUpperCase()) {
+                                console.log("Element already exists");
                                 flag12 = true;
                             }
                         }
@@ -715,18 +753,37 @@ function onEachFeature(f, l) {
                                 dataType: "json",
                                 async: false,
                                 success: function (data) {
-                                    let node = btn.parentNode.firstChild;
-                                    while (node) {
-                                        if (node.nodeName == "SELECT") {
-                                            let id = node.id;
-                                            //console.log("id "+ id);
-                                            let option = document.createElement('option');
-                                            option.value = label;
-                                            option.innerHTML = label;
-                                            $("select#" + id).append(option);
-                                            label1.push(label);
+                                    if(data.result =="correct"){
+                                        let node = btn.parentNode.firstChild;
+                                        while (node) {
+                                            if (node.nodeName == "SELECT") {
+                                                let id = node.id;
+                                                //console.log("id "+ id);
+                                                let option = document.createElement('option');
+                                                option.value = label;
+                                                option.innerHTML = label;
+                                                $("select#" + id).append(option);
+                                                label1.push(label);
+                                            }
+                                            node = node.nextSibling;
                                         }
-                                        node = node.nextSibling;
+                                    }else if(data.result == "alreadyinserted"){
+                                        alert("label already inserted!");
+                                        let node = btn.parentNode.firstChild;
+                                        while (node) {
+                                            if (node.nodeName == "SELECT") {
+                                                let id = node.id;
+                                                //console.log("id "+ id);
+                                                let option = document.createElement('option');
+                                                option.value = label;
+                                                option.innerHTML = label;
+                                                $("select#" + id).append(option);
+                                                label1.push(label);
+                                            }
+                                            node = node.nextSibling;
+                                        }
+                                    }else{
+                                        console.log(data.result);
                                     }
                                 }
                             });
@@ -1078,97 +1135,105 @@ function updateMap(localPlace,localDate){
                         contentType: 'application/json',
                         data:JSON.stringify(polygonGeoJson),
                         dataType:"json",
-                        success:function(data){
+                        success:function(data) {
                             //the identified layer will be removed from map, then it will be added using geojson
-                            map.map.eachLayer(function (layer) {
-                                if(layer._leaflet_id == leafletID){
-                                    //console.log("layer identified " + leafletID );
-                                    map.map.removeLayer(layer);
-                                }
-                            });
-                            var data1 = data;
-                            //this call ajax asks the db the storms'list of a specific date
-                            $.ajax({
-                                url: "{{url_for("listStormOnDate")}}",
-                                method:"POST",
-                                data:{"dateStr":map.ncepDate},
-                                dataType:"json",
-                                success:function(data){
-                                    let name;
-                                    let countG;
-                                    let flag = false;
-                                    console.log("countPolygon: "+ countPolygon);
-                                    let polygonJSON;
-                                    let polygon;
-                                    for (let key in data){
-                                        //console.log(data[key]);
-                                        let id1 = data[key]._id;
-                                        console.log("id caricato e' "+id1);
-                                        if(data1.id == id1){
-                                            //when a specific layer is identified, it'll add into leaflet using a geojson
-                                            polygon = data[key];
-                                            name =data[key]["properties"]["name"];
-                                            delete data[key]._id;
-                                            //console.log(data[key]);
-                                            let a = L.geoJSON(data[key],{
-                                                onEachFeature: onEachFeature
-                                            });
-                                            countPolygon++;
-                                            console.log("countPolygon: "+ countPolygon);
-                                            polygonJSON = a;
 
-                                            for (let key1 in groupPolygon){
-                                                if(name == groupPolygon[key1]["name"]){
-                                                    flag = true;
-                                                    groupPolygon[key1]["group"].addLayer(a);
-                                                    groupPolygon[key1]["count"] = groupPolygon[key1]["count"] + 1;
-                                                    countG = groupPolygon[key1]["count"];
-                                                    if(countG == 1){
-                                                        groupPolygon[key1]["group"].addTo(map.map);
-                                                        let a = groupPolygon[key1]["name"];
-                                                        if(a == ""){
-                                                            a = "NO LABEL";
+                            if (data.resut == "correct") {
+                                map.map.eachLayer(function (layer) {
+                                    if (layer._leaflet_id == leafletID) {
+                                        //console.log("layer identified " + leafletID );
+                                        map.map.removeLayer(layer);
+                                    }
+                                });
+                                var data1 = data;
+                                //this call ajax asks the db the storms'list of a specific date
+                                $.ajax({
+                                    url: "{{url_for("listStormOnDate")}}",
+                                    method: "POST",
+                                    data: {"dateStr": map.ncepDate},
+                                    dataType: "json",
+                                    success: function (data) {
+                                        let name;
+                                        let countG;
+                                        let flag = false;
+                                        console.log("countPolygon: " + countPolygon);
+                                        let polygonJSON;
+                                        let polygon;
+                                        for (let key in data) {
+                                            //console.log(data[key]);
+                                            let id1 = data[key]._id;
+                                            console.log("id caricato e' " + id1);
+                                            if (data1.id == id1) {
+                                                //when a specific layer is identified, it'll add into leaflet using a geojson
+                                                polygon = data[key];
+                                                name = data[key]["properties"]["name"];
+                                                delete data[key]._id;
+                                                //console.log(data[key]);
+                                                let a = L.geoJSON(data[key], {
+                                                    onEachFeature: onEachFeature
+                                                });
+                                                countPolygon++;
+                                                console.log("countPolygon: " + countPolygon);
+                                                polygonJSON = a;
+
+                                                for (let key1 in groupPolygon) {
+                                                    if (name == groupPolygon[key1]["name"]) {
+                                                        flag = true;
+                                                        groupPolygon[key1]["group"].addLayer(a);
+                                                        groupPolygon[key1]["count"] = groupPolygon[key1]["count"] + 1;
+                                                        countG = groupPolygon[key1]["count"];
+                                                        if (countG == 1) {
+                                                            groupPolygon[key1]["group"].addTo(map.map);
+                                                            let a = groupPolygon[key1]["name"];
+                                                            if (a == "") {
+                                                                a = "NO LABEL";
+                                                            }
+                                                            let b = groupPolygon[key1]["count"];
+                                                            let c = groupPolygon[key1]["group"]._leaflet_id;
+                                                            let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                                                            layerControl1.addOverlay(groupPolygon[key1]["group"], name1);
                                                         }
-                                                        let b = groupPolygon[key1]["count"];
-                                                        let c = groupPolygon[key1]["group"]._leaflet_id;
-                                                        let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
-                                                        layerControl1.addOverlay(groupPolygon[key1]["group"], name1);
+                                                        console.log("name: " + groupPolygon[key1]["name"] + " count: " + groupPolygon[key1]["count"]);
                                                     }
-                                                    console.log("name: " + groupPolygon[key1]["name"] + " count: " + groupPolygon[key1]["count"]);
                                                 }
                                             }
                                         }
-                                    }
-                                    if(countPolygon == 1){
-                                        layerControl1.addTo(map.map);
-                                    }
+                                        if (countPolygon == 1) {
+                                            layerControl1.addTo(map.map);
+                                        }
 
-                                    if(!flag){
-                                        let a = {"name":name,
-                                                "count" : 1,
-                                                "group":L.layerGroup()
-                                        };
-                                        //console.log(a);
-                                        groupPolygon.push(a);
-                                        for(let key in groupPolygon){
-                                            if(groupPolygon[key]["name"] == name){
+                                        if (!flag) {
+                                            let a = {
+                                                "name": name,
+                                                "count": 1,
+                                                "group": L.layerGroup()
+                                            };
+                                            //console.log(a);
+                                            groupPolygon.push(a);
+                                            for (let key in groupPolygon) {
+                                                if (groupPolygon[key]["name"] == name) {
                                                     //console.log("creation new group" + name);
                                                     groupPolygon[key]["group"].addLayer(polygonJSON);
                                                     groupPolygon[key]["group"].addTo(map.map);
                                                     let a = groupPolygon[key]["name"];
-                                                    if(a == ""){
+                                                    if (a == "") {
                                                         a = "NO LABEL".toUpperCase();
                                                     }
                                                     let b = groupPolygon[key]["count"];
                                                     let c = groupPolygon[key]["group"]._leaflet_id;
                                                     let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
                                                     layerControl1.addOverlay(groupPolygon[key]["group"], name1);
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            });
-
+                                });
+                            }else if(data.result == "alreadyinserted"){
+                                alert("polygon has already been inserted")
+                                console.log("polygon has already been inserted")
+                            }else{
+                                console.log(data);
+                            }
                         }
                     });
             }
