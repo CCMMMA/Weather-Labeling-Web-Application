@@ -40,14 +40,6 @@ def home():
         return render_template('/admin/index.html')
     return redirect(url_for('index'))
 
-
-@app.route("/registration")
-def registration():
-    """This function allows to register our account"""
-    if "logged_in" in session and session["logged_in"] == True:
-        return redirect(url_for('main'))
-    return render_template('registration.html')
-
 @app.route('/createUser',methods=["GET","POST"])
 def createUser():
     """This function adds new user"""
