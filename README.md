@@ -16,7 +16,7 @@ Configuration:
 2. cd Weather-Labeling-Web-Application/
 3. virtualenv venv
 4. source venv/bin/activate
-5. pip install pip —upgrade
+5. pip install --upgrade pip
 6. pip install -r requirements.txt
 7. export FLASK_APP=app.py
 8. export FLASK_DEBUG=true
