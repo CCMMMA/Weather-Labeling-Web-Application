@@ -34,8 +34,15 @@ class ManageDB(object):
 
     def insertPolygonDB(self,polygonGeoJson):
         """This method allows to add polygon"""
-        id= self.db.PolygonCollection.insert(polygonGeoJson)
-        return id
+        count = self.db.PolygonCollection.find({"geometry.coordinates":polygonGeoJson["geometry"]["coordinates"],"properties.dateStr":polygonGeoJson["properties"]["dateStr"]})
+        if count == 0:
+            id = self.db.PolygonCollection.insert(polygonGeoJson)
+            result = True
+            return result,id
+        else:
+            result= False
+            id = None
+            return result,id
 
     def deletePolygonDB(self,id):
         """This method allows to remove polygon"""
@@ -138,13 +145,21 @@ class ManageDB(object):
 
     def insertLabelDB(self, label):
         """This method insert a new label"""
-        id = self.db.LabelCollection.insert(label)
-        return id
+        count = self.db.LabelCollection.find({"labelName":label["labelName"]}).count()
+        if(count == 0):
+            result = True
+            id = self.db.LabelCollection.insert(label)
+            return result,id
+        else:
+            result= False
+            id = None
+            return result,id
+
 
     def listLabelDB(self):
         """This method asks the DB the labels' list"""
         count = self.db.LabelCollection.find().count()
-        print("Number Label: ",count)
+        #print("Number Label: ",count)
         if(count >= 1):
             result = True
             cursorListLabel = self.db.LabelCollection.find()
