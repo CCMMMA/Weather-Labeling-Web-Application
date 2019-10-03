@@ -191,7 +191,7 @@ def insertStorm():
                 polygons.append(poly)
             flag1=False
             for i in range(0,len(polygons)):
-                if(polygons[i].intersects(polyA)):
+                if(polygons[i].overlaps(polyA)):
                     flag1=True
             if flag1:
                 return json.dumps({"result": "intersection"})
