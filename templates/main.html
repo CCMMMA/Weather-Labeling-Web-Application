@@ -118,19 +118,24 @@
             width: auto;
             padding-left: 13px;
         }
+        a.active2:hover{
+            color: black !important;
+        }
     </style>
 </head>
 <body>
-
 <ul id="myUl1">
     {% if data.flag == "true" %}
         <li class="myLi1" style="text-align: center;color:white;border-right: 1px solid white;"><img  class="img1"src="{{url_for('static',filename='img/ccmmma_logo3_web.png')}}" alt="METEO UNIPARTHENOPE"></li>
     {% endif %}
-    <li class="myLi1" style="text-align: center;color:white;background-color:#39748e;border-right: 1px solid white;"; ><a href="/" class="myA1">{{session['username']}}</a></li>
+    <li class="myLi1" style="text-align: center;color:white;background-color:#39748e;border-right: 1px solid white;pointer-events: none;
+" ><a href="/" class="myA1">{{session['username']}}</a></li>
     
     <li style="" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
+    <li class="myLi1" style="float:right;"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
+    <!--<li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" href="/" style="background-color:#17a2b8 !important;"><i class="fa fa-bell" aria-hidden="true"></i>-->
+</a></li>
 
-    <li class="myLi1" style="float:right"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
 </ul>
 <br>
 <div id="title"></div>
@@ -148,6 +153,7 @@ function compare(a,b) {
    return 0;
 }
 
+var countPolygonTotal = 0;
 var label1 = [];
 var groupPolygon = [];
 var layerControl1;
@@ -161,8 +167,8 @@ var removeActive = false;
 
 function onEachFeature(f, l) {
         //This function adds the popup to each layer
-        console.log(f);
-        console.log(l);
+        //console.log(f);
+        //console.log(l);
         let role = "{{session.role}}";
         let usernameSession ="{{session.username}}";
         let usernameGeoJSON = f.properties.username;
@@ -184,6 +190,9 @@ function onEachFeature(f, l) {
                             data: {"id": idDB},
                             dataType: "json",
                             success: function (data) {
+                                if (data.result == "exit") {
+                                     location.reload();
+                                }
                                 //console.log("leafletid removed "+leafletID);
                                 countPolygon--;
                                 //console.log("countPolygon: "+ countPolygon);
@@ -192,7 +201,7 @@ function onEachFeature(f, l) {
                                 }else if(data.result == "empty"){
                                     console.log("polygon already removed from DB");
                                 }else{
-                                    console.log("error: DB inconsistent");
+                                    console.log(data.result);
                                 }
                                 for (let key in groupPolygon) {
                                     groupPolygon[key].group.eachLayer(function (layer) {
@@ -291,17 +300,18 @@ function onEachFeature(f, l) {
                                         for (let j = 0; j < data111.length; j++) {
                                             if (data[i].labelName == data111[j].labelName.toUpperCase()) {
                                                 flag15 = true;
-                                                console.log("Element already exists");
+                                                //console.log("Element already exists");
                                             }
                                         }
                                         for (let j = 0; j < label1.length; j++) {
                                             //console.log("item in frontend: "+ data111[i].labelName);
                                             if (data[i].labelName == label1[j].toUpperCase()) {
                                                 flag15 = true;
-                                                console.log("Element already exists");
+                                                //console.log("Element already exists");
                                             }
                                         }
                                         if(!flag15){
+                                            console.log("Element doesn't already exist");
                                             let option = document.createElement('option');
                                             option.value = data[i].labelName;
                                             option.innerHTML = data[i].labelName;
@@ -338,6 +348,9 @@ function onEachFeature(f, l) {
                                             data: {"id": f.properties.idDB, "name": nextValue},
                                             dataType: "json",
                                             success: function (data) {
+                                                if (data.result == "exit") {
+                                                     location.reload();
+                                                }
                                                 if (data.result == "correct") {
                                                     //console.log(element.value);
                                                     $(element).prev().html(element.value);
@@ -704,7 +717,7 @@ function onEachFeature(f, l) {
                                     }
 
                                 }else{
-                                    console.log("DB inconsistent");
+                                    console.log(data.result);
                                 }
                             }
                         });
@@ -753,6 +766,9 @@ function onEachFeature(f, l) {
                                 dataType: "json",
                                 async: false,
                                 success: function (data) {
+                                    if (data.result == "exit") {
+                                         location.reload();
+                                    }
                                     if(data.result =="correct"){
                                         let node = btn.parentNode.firstChild;
                                         while (node) {
@@ -842,7 +858,28 @@ function updateMap(localPlace,localDate){
     layerControl1 = L.control.layers();
     map=jQueryProtect("#map").MeteoUniparthenopeMap(localPlace,localDate,{ "noPopup":false, "mapName":_mapName,"baseLink":"https://meteo.uniparthenope.it/product_dashboard/dashboard?"});
     //console.log("DATA 2 "+ map.myDate);
-
+    {#var interval1 = setInterval(function() {
+            $.ajax({
+                    url:"{{url_for("countPolygon")}}",
+                    method:"POST",
+                    data:{"dateStr":map.ncepDate},
+                    dataType:"json",
+                    async:false,
+                    success:function(data){
+                        if(data.result = "correct"){
+                            let count1 = parseInt(data.count);
+                            console.log("total polygon n."+count1);
+                            //console.log("total polygon n."+countPolygon);
+                            if((data.count - countPolygon)>0){
+                                $(".active2").css({"color": "yellow"});
+                                clearInterval(interval1);
+                            }else{
+                                $(".active2").css({"color": "white"});
+                            }
+                        }
+                    }
+            });
+    }, 30000);#}
     {% if session.role == 'ADMIN' %}
         map.map.pm.addControls({
             position: 'topleft',
@@ -992,7 +1029,7 @@ function updateMap(localPlace,localDate){
         data:{"dateStr":map.ncepDate},
         dataType:"json",
         success:function(data) {
-            console.log(data);
+            //console.log(data);
             if (data.result == "empty") {
                 console.log("there aren't clusters' points");
             }else{
@@ -1137,8 +1174,11 @@ function updateMap(localPlace,localDate){
                         dataType:"json",
                         success:function(data) {
                             //the identified layer will be removed from map, then it will be added using geojson
-
+                            if (data.result == "exit") {
+                                 location.reload();
+                            }
                             if (data.result == "correct") {
+                                console.log("polygon entry in progress");
                                 map.map.eachLayer(function (layer) {
                                     if (layer._leaflet_id == leafletID) {
                                         //console.log("layer identified " + leafletID );
@@ -1232,7 +1272,7 @@ function updateMap(localPlace,localDate){
                                 alert("polygon has already been inserted")
                                 console.log("polygon has already been inserted")
                             }else{
-                                console.log(data);
+                                console.log(data.result);
                             }
                         }
                     });
@@ -1253,6 +1293,9 @@ function updateMap(localPlace,localDate){
             data: {"id": idDB},
             dataType: "json",
             success: function (data) {
+                if (data.result == "exit") {
+                    location.reload();
+                }
                 //console.log("leafletid removed "+leafletID);
                 countPolygon--;
                 //console.log("countPolygon: "+ countPolygon);
@@ -1262,7 +1305,7 @@ function updateMap(localPlace,localDate){
                 }else if(data.result == "empty"){
                     console.log("polygon already removed from DB");
                 }else{
-                    console.log("error: DB inconsistent");
+                    console.log(data.result);
                 }
                 for (let key in groupPolygon) {
                     groupPolygon[key].group.eachLayer(function (layer) {
@@ -1327,9 +1370,7 @@ function updateMap(localPlace,localDate){
 
 
     jQueryProtect( document ).ready(function() {
-        $("path.leaflet-interactive").on("click",function(){
-        alert("ciao!");
-    });
+
         var weatherValue = 3;
         control=jQueryProtect("#control").MeteoUniparthenopeControl(_place,null,null,dateTime=null);
         map=jQueryProtect("#map").MeteoUniparthenopeMap(_place,_ncepDate,{ "noPopup":false, "mapName":_mapName,"baseLink":"https://meteo.uniparthenope.it/product_dashboard/dashboard?"});
