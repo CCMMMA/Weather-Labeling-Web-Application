@@ -108,9 +108,13 @@ class ManageDB(object):
     def getPolygonOnDate(self,date1):
         """This method allows to get a specific polygon"""
         count = self.db.PolygonCollection.find({"properties.dateStr":date1}).count()
-        print("Numer Polygon of specific date",count)
-        cursorPolygon = self.db.PolygonCollection.find({"properties.dateStr":date1})
-        return cursorPolygon
+        if count == 0:
+            cursorPolygon = None
+            return count,cursorPolygon
+        else:
+            print("Numer Polygon of specific date",count)
+            cursorPolygon = self.db.PolygonCollection.find({"properties.dateStr":date1})
+            return count,cursorPolygon
 
     #------------------------POINT CLUSTER------------------------------------------
 
