@@ -25,7 +25,7 @@ Configuration:
 - "db.UserCollection.createIndex( { "username": 1 }, { unique: true } )"
 - "db.LabelCollection.createIndex( { "labelId": 1 }, { unique: true } )" ,
 - "db.LabelCollection.createIndex( { "labelName": 1 }, { unique: true } )".
-- db.PolygonCollection.createIndex({"geometry.coordinates":1,"properties.dateStr":1},{unique:true})
+- "db.PolygonCollection.createIndex({"geometry.coordinates":1,"properties.dateStr":1},{unique:true})"
 
 10. It's necessary to insert the first admin by mongo's shell:
 for example you could type this command:
