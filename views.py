@@ -3,6 +3,7 @@
 from myfunction import *
 import datetime
 import os
+from shapely.geometry import Polygon
 
 #these values allows to insert the default labels
 flag = False
@@ -170,6 +171,30 @@ def insertStorm():
         #    print(key,value)
         #    print(" ")
         #print(type(polygonGeoJson))
+
+        coords = []
+        for i in range(0,len(polygonGeoJson["geometry"]["coordinates"][0])):
+            coords.append(tuple((polygonGeoJson["geometry"]["coordinates"][0][i][0],polygonGeoJson["geometry"]["coordinates"][0][i][1])))
+        polyA = Polygon(coords)
+        print(polygonGeoJson)
+        print(polyA)
+
+        count,cursorPolygon = managedb.getPolygonOnDate(datenew)
+        if count > 0:
+            polygons = []
+            for polygon in cursorPolygon:
+                coords1 = []
+                for i in range(0,len(polygon["geometry"]["coordinates"][0])):
+                    print("lng:",polygon["geometry"]["coordinates"][0][i][0],"lat:",polygon["geometry"]["coordinates"][0][i][1])
+                    coords1.append(tuple((polygon["geometry"]["coordinates"][0][i][0],polygon["geometry"]["coordinates"][0][i][1])))
+                poly = Polygon(coords1)
+                polygons.append(poly)
+            flag1=False
+            for i in range(0,len(polygons)):
+                if(polygons[i].intersects(polyA)):
+                    flag1=True
+            if flag1:
+                return json.dumps({"result": "intersection"})
         print(session["username"])
         try:
             count1 = managedb.getCountLoginDB(session["username"])
