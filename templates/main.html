@@ -133,7 +133,7 @@
     
     <li style="" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
     <li class="myLi1" style="float:right;"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
-    <!--<li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" href="/" style="background-color:#17a2b8 !important;"><i class="fa fa-bell" aria-hidden="true"></i>-->
+    <li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" href="/" style="background-color:#17a2b8 !important;"><i class="fa fa-bell" aria-hidden="true"></i>
 </a></li>
 
 </ul>
@@ -858,7 +858,7 @@ function updateMap(localPlace,localDate){
     layerControl1 = L.control.layers();
     map=jQueryProtect("#map").MeteoUniparthenopeMap(localPlace,localDate,{ "noPopup":false, "mapName":_mapName,"baseLink":"https://meteo.uniparthenope.it/product_dashboard/dashboard?"});
     //console.log("DATA 2 "+ map.myDate);
-    {#var interval1 = setInterval(function() {
+    var interval1 = setInterval(function() {
             $.ajax({
                     url:"{{url_for("countPolygon")}}",
                     method:"POST",
@@ -870,7 +870,7 @@ function updateMap(localPlace,localDate){
                             let count1 = parseInt(data.count);
                             console.log("total polygon n."+count1);
                             //console.log("total polygon n."+countPolygon);
-                            if((data.count - countPolygon)>0){
+                            if((count1 - countPolygon)>0){
                                 $(".active2").css({"color": "yellow"});
                                 clearInterval(interval1);
                             }else{
@@ -879,7 +879,7 @@ function updateMap(localPlace,localDate){
                         }
                     }
             });
-    }, 30000);#}
+    }, 10000);
     {% if session.role == 'ADMIN' %}
         map.map.pm.addControls({
             position: 'topleft',
@@ -1269,8 +1269,17 @@ function updateMap(localPlace,localDate){
                                     }
                                 });
                             }else if(data.result == "alreadyinserted"){
-                                alert("polygon has already been inserted")
-                                console.log("polygon has already been inserted")
+                                alert("polygon has already been inserted");
+                                console.log("polygon has already been inserted");
+                            }else if(data.result == "intersection"){
+                                map.map.eachLayer(function (layer) {
+                                    if (layer._leaflet_id == leafletID) {
+                                        //console.log("layer identified " + leafletID );
+                                        map.map.removeLayer(layer);
+                                    }
+                                });
+                                alert("polygon intersects another");
+                                console.log("polygon intersects another");
                             }else{
                                 console.log(data.result);
                             }
