@@ -21,15 +21,36 @@ class UserView(ModelView):
     column_list = ('name','surname','username', 'password','role')
     column_sortable_list = ('name','surname','username', 'password','role')
     form = UserForm
+
     def on_model_change(self, form, model, is_created):
+        try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                session.clear()
+        except Exception as e:
+            session.clear()
+            print("Error DB",str(e))
         password = model.get('password')
         model['password'] = generate_password_hash(password, method='pbkdf2:sha256')
+
     def on_model_delete(self,model):
         username = model.get('username')
         try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                session.clear()
             managedb.deletePolygonDBonUsername(username)
         except Exception as e:
+            session.clear()
             print("Error DB",str(e))
 
     def is_accessible(self):
+        try:
+            if(session["username"] == "ADMIN"):
+                count1 = managedb.getCountLoginDB(session["username"])
+                if count1 == 0:
+                    session.clear()
+        except Exception as e:
+            session.clear()
+            print("Error DB",str(e))
         return (session["role"] == "ADMIN")
