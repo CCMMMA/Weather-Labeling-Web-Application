@@ -45,6 +45,10 @@ class ManageDB(object):
             id = None
             return result,id
 
+    def countPolygonDB(self,date1):
+        count1 = self.db.PolygonCollection.find({"properties.dateStr": date1}).count()
+        return count1
+
     def deletePolygonDB(self,id):
         """This method allows to remove polygon"""
         count = self.db.PolygonCollection.count({"_id":ObjectId(id)})
@@ -173,13 +177,19 @@ class ManageDB(object):
 
     def loginDB(self,username):
         """This method checks userdata"""
-        count = self.db.UserCollection.count({'username':username})
+        count = self.db.UserCollection.find({'username':username}).count()
         if(count == 1):
             user = self.db.UserCollection.find_one({'username':username})
             return count,user
         else:
             user = None
             return count,user
+
+    def getCountLoginDB(self,username):
+        """This method checks userdata"""
+        count = self.db.UserCollection.find({'username':username}).count()
+        return count
+
 
     def createUserDB(self,name,surname,username,password):
         id = self.db.UserCollection.insert_one({'name':name,'surname':surname,'username':username,'password':password})
