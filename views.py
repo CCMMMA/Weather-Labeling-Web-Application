@@ -20,15 +20,49 @@ def index():
     global data
     if "logged_in" in session and session["logged_in"] == True:
         print("User login",session["username"])
-        return render_template('main.html',data=data)
+        try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                session.clear()
+                return render_template('loginPage.html',data=data)
+            return redirect(url_for('main'))
+        except Exception as e:
+            print("Error DB:",str(e))
+            return render_template('loginPage.html', data=data)
     return render_template('loginPage.html',data=data)
+
+@app.route("/main")
+def main():
+    """This functions allows to access to web app main page"""
+    global data
+    if "logged_in" in session and session["logged_in"] == True:
+        print("User login", session["username"])
+        try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                session.clear()
+                return redirect(url_for('index'))
+            return render_template('main.html', data=data)
+        except Exception as e:
+            print("Error DB:",str(e))
+            return redirect(url_for('index'))
+    return redirect(url_for('index'))
+
+
 
 @app.route("/home")
 def home():
-    """This function allows to execute the login; if user is already logged in , he will able to access the main page"""
+    """This functions allows to access to user management page"""
     if "logged_in" in session and session["logged_in"] == True:
-        print("User login",session["username"])
-        return render_template('/admin/index.html')
+        print("User login", session["username"])
+        try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return redirect(url_for('index'))
+            return render_template('/admin/index.html')
+        except Exception as e:
+            print("Error DB:",str(e))
+            return redirect(url_for('index'))
     return redirect(url_for('index'))
 
 @app.route('/createUser',methods=["GET","POST"])
@@ -136,7 +170,11 @@ def insertStorm():
         #    print(key,value)
         #    print(" ")
         #print(type(polygonGeoJson))
+        print(session["username"])
         try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return json.dumps({"result": "exit"})
             result,id = managedb.insertPolygonDB(polygonGeoJson)
             if result==True:
                 # print("Polygon da inserire con idDB:",str(id))
@@ -154,6 +192,9 @@ def deleteStorm():
         idDB = request.form['id']
         print("Polygon to be deleted with idDB",idDB)
         try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return json.dumps({"result": "exit"})
             result = managedb.deletePolygonDB(idDB)
             if result == "correct":
                 return json.dumps({"result":"correct"})
@@ -237,6 +278,9 @@ def insertLabelsOnIdDB():
     global count12
     if request.is_xhr and request.method=="POST":
         try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return json.dumps({"result": "exit"})
             count12 = managedb.countLabelDB()
         except Exception as e:
             print("exception error DB", str(e))
@@ -255,6 +299,18 @@ def insertLabelsOnIdDB():
             print("exception error DB", str(e))
             return json.dumps({"result": "error"})
 
+@app.route('/countPolygon',methods=["GET","POST"])
+def countPolygon():
+    if request.is_xhr and request.method=="POST":
+        dateold = request.form["dateStr"]
+        print(dateold)
+        datenew = datetime.datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
+        try:
+            count = managedb.countPolygonDB(datenew)
+            return json.dumps({"result": "correct","count": str(count)})
+        except Exception as e:
+            print("exception error DB",str(e))
+            return json.dumps({"result": "error"})
 
 @app.route('/checkLabel',methods=["GET","POST"])
 def checkLabel():
@@ -274,7 +330,7 @@ def checkLabel():
             else:
                 return json.dumps({"result": "inconsistent"})
         except Exception as e:
-            print("exception error DB111",str(e))
+            print("exception error DB",str(e))
             return json.dumps({"result": "error"})
 
 
@@ -287,6 +343,9 @@ def modifyLabel():
         #print("modifica label del Polygon con idDB",idDB)
         #print("nuova etichetta",name)
         try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return json.dumps({"result": "exit"})
             managedb.modifyLabelPolygonOnIdDB(idDB,name)
             return json.dumps({"result": "correct"})
         except Exception as e:
