@@ -190,11 +190,22 @@ def insertStorm():
                 poly = Polygon(coords1)
                 polygons.append(poly)
             flag1=False
+            flag2=False
+            flag3=False
+            flag4=False
             for i in range(0,len(polygons)):
                 if(polygons[i].overlaps(polyA)):
                     flag1=True
-            if flag1:
+                if (polygons[i].equals(polyA)):
+                    flag2 = True
+                if (polygons[i].contains(polyA)):
+                    flag3 = True
+                if (polygons[i].within(polyA)):
+                    flag4 = True
+            if flag1 or flag3 or flag4:
                 return json.dumps({"result": "intersection"})
+            if flag2:
+                return json.dumps({"result": "alreadyinserted"})
         print(session["username"])
         try:
             count1 = managedb.getCountLoginDB(session["username"])
