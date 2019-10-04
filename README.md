@@ -20,7 +20,7 @@ Configuration:
 6. pip install -r requirements.txt
 7. export FLASK_APP=app.py
 8. export FLASK_DEBUG=true
-11. you must execute these commands in mongo shell:
+11. you must install mongo db and execute these commands in mongo shell:
 
 - db.UserCollection.createIndex( { "username": 1 }, { unique: true } )
 - db.LabelCollection.createIndex( { "labelId": 1 }, { unique: true } )
