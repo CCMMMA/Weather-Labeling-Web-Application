@@ -75,7 +75,7 @@
             opacity: 0.7;
         }
         #mapmap-container,#mapmap-container-mapid{
-            height: 480px !important;
+            height: 70vh !important;
         }
         #control{
             height:78px !important;
@@ -158,10 +158,7 @@ var groupPolygon = [];
 var layerControl1;
 var countPolygon = 0;
 var classCluster = null;
-var myDate = null;
-var allFeature = [];
 var count = 0;
-var countLabel = 0;
 var removeActive = false;
 
 function onEachFeature(f, l) {
@@ -852,9 +849,14 @@ function onEachFeature(f, l) {
 }
 
 function updateMap(localPlace,localDate){
-
+    countPolygonTotal = 0;
+    label1 = [];
     groupPolygon = [];
     layerControl1 = L.control.layers();
+    countPolygon = 0;
+    classCluster = null;
+    count = 0;
+    removeActive = false;
     map=jQueryProtect("#map").MeteoUniparthenopeMap(localPlace,localDate,{ "noPopup":false, "mapName":_mapName,"baseLink":"https://meteo.uniparthenope.it/product_dashboard/dashboard?"});
     //console.log("DATA 2 "+ map.myDate);
     var interval1 = setInterval(function() {
