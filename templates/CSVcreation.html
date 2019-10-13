@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>CSV | Meteo Uniparthenope</title>
+    <style>
+        body{
+         margin:0 auto;
+        }
+        form.myForm{
+            margin: 1px 5px;
+        }
+        table.myTable{
+            margin-top: 2%;
+            margin-left: 5%;
+            margin-right:5%;
+            width: 90%;
+        }
+        ul#myUl1{
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+
+          overflow: hidden;
+          background-color: #17a2b8;
+        }
+        li.myLi1{
+            float:left;
+        }
+        li.myLi1 a.myA1{
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 11px 16px;
+            text-decoration: none;
+            background-color: #39748e;
+            height: 49px;
+        }
+
+        li.myLi1 a.myA1.active1:hover{
+            background-color: #62859bb3;
+        }
+        img.img1{
+            height: 44px;
+            width: auto;
+            padding-left: 13px;
+        }
+        a.active2:hover{
+            color: black !important;
+        }
+        ul#myUl1{
+            font-family: "Times New Roman", Times, serif;
+            font-size:18px;
+            height: 49px;
+        }
+        #myDiv1{
+            margin-top: 5%;
+            margin-left: 5%;
+            margin-right:5%;
+            border: 1px solid grey;
+        }
+        #infoResult{
+            height: auto;
+            width: 100%;
+            margin: 0px auto;
+            border-radius: 15px;
+        }
+    </style>
+  </head>
+  <body>
+      <ul id="myUl1">
+          {% if data.flag == "true" %}
+              <li class="myLi1" style="text-align: center;color:white;border-right: 1px solid white;height: 57px"><a href="{{url_for('index')}}"><img  class="img1"src="{{url_for('static',filename='img/ccmmma_logo3_web.png')}}" alt="METEO UNIPARTHENOPE"></a></li>
+          {% endif %}
+          <li class="myLi1" style="text-align: center;color:white;background-color:#39748e;border-right: 1px solid white;pointer-events: none;
+        " ><a href="/" class="myA1">{{session['username']}}</a></li>
+          <li style="border-right: 1px solid white;" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
+          <li style="" class="myLi1"><a class="myA1 active1" href="{{url_for('CSVcreation')}}">CSV</a></li>
+          <li class="myLi1" style="float:right;"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
+        </a></li>
+      </ul>
+
+      <!--Alert-->
+      <div id="infoResult" style="" ></div>
+
+      <div id="myDiv1">
+          <form id="myForm" class="myForm form-inline" action="javascript:">
+              <div class="form-group">
+                <label style="margin-left: 5px" for="startDate">START DATETIME: </label>
+                <input value="2019-01-01" style="margin-left: 5px;margin-right: 5px;" type="date" class="form-control" id="startDate" name="startDate">
+              </div>
+              <div class="form-group">
+                <label for="startHour">HH: </label>
+                <select style="margin-left: 5px;margin-right: 5px;" class="form-control form-control-sm" id="startHour" name="startHour">
+                  <option value="0" selected="selected">00</option>
+                  <option value="1">01</option>
+                  <option value="2">02</option>
+                  <option value="3">03</option>
+                  <option value="4">04</option>
+                  <option value="5">05</option>
+                  <option value="6">06</option>
+                  <option value="7">07</option>
+                  <option value="8">08</option>
+                  <option value="9">09</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="13">13</option>
+                  <option value="14">14</option>
+                  <option value="15">15</option>
+                  <option value="16">16</option>
+                  <option value="17">17</option>
+                  <option value="18">18</option>
+                  <option value="19">19</option>
+                  <option value="20">20</option>
+                  <option value="21">21</option>
+                  <option value="22">22</option>
+                  <option value="23">23</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="margin-left: 5px" for="endDate">END DATETIME: </label>
+                <input value="2019-01-01" style="margin-left: 5px;margin-right: 15px;" type="date" class="form-control" name="endDate" id="endDate">
+              </div>
+              <div class="form-group">
+                <label for="endHour">HH: </label>
+                <select style="margin-left: 5px;margin-right: 5px;" class="form-control form-control-sm" name="endHour" id="endHour" >
+                  <option value="0" selected="selected">00</option>
+                  <option value="1">01</option>
+                  <option value="2">02</option>
+                  <option value="3">03</option>
+                  <option value="4">04</option>
+                  <option value="5">05</option>
+                  <option value="6">06</option>
+                  <option value="7">07</option>
+                  <option value="8">08</option>
+                  <option value="9">09</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="13">13</option>
+                  <option value="14">14</option>
+                  <option value="15">15</option>
+                  <option value="16">16</option>
+                  <option value="17">17</option>
+                  <option value="18">18</option>
+                  <option value="19">19</option>
+                  <option value="20">20</option>
+                  <option value="21">21</option>
+                  <option value="22">22</option>
+                  <option value="23">23</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="margin-left: 15px" for="dominionResolution">Dominion resolution: </label>
+                <select style="margin-left: 5px;margin-right: 5px;" class="form-control form-control-sm" name="dominionResolution" id="dominionResolution">
+                  <option value="1" selected="selected">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+              <div class="col-auto my-1">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+          </form>
+      </div>
+      <!--Modal-->
+      <div id="myModal1" class="modal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>the creation process is in progress, if they are created they will be displayed on this page</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+      </div>
+      <!--List of files-->
+      <div class="table-responsive">
+          <table id="myTable" class="myTable table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Created</th>
+                  <th scope="col">file</th>
+                  <th scope="col">Option</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+      </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="{{url_for('static',filename='js/jquery-3.4.1.min.js')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var countFile = 1;
+        function createNewRows(data){
+            let table = document.getElementById("myTable");
+            for(let i = 0; i < data.result.length;i++){
+                let row = table.insertRow(-1);
+                row.setAttribute("id","myRow"+countFile);
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let cell4 = row.insertCell(3);
+                cell1.innerHTML = String(countFile);
+                cell2.innerHTML = data.result[i].f_ct;
+                cell3.innerHTML = data.result[i].filename;
+                cell4.innerHTML = '<a id="myA'+countFile+'" href="#" download><button type="button" id="download'+countFile+'" class="myButton btn btn-default" aria-label="Left Align"><i title="Dowload file" class="fa fa-save "></i></button></a>';
+                cell4.innerHTML += '<button type="button" id="remove'+countFile+'" class="myButton btn btn-default" aria-label="Left Align"><i title="Remove file" class="fa fa-eraser "></i></button>';
+                $("#download"+countFile).on("click",function(){
+                   let row1 = $(this).closest("tr");
+                   let filename1 = row1.find("td:eq(2)").text();
+                   console.log(filename1);
+                   path1 = "static/user_files/"+"{{session['username']}}/"+filename1;
+                   console.log(path1);
+                   $(this).closest("a").attr("href",path1);
+                   //window.location.href = path1;
+                });
+                $("#remove"+countFile).on("click",function(){
+                   let row1 = $(this).closest("tr");
+                   let filename1 = row1.find("td:eq(2)").text();
+                   path1 = "static/user_files/"+"{{session['username']}}/"+filename1;
+                   console.log(path1);
+                   $.ajax({
+                        url: "{{url_for("deleteFileCSV")}}",
+                        type: 'POST',
+                        data:{"path":path1},
+                        dataType: 'json',
+                        success: function(data){
+                            console.log(data);
+                            if(data.result=="removed"){
+                                countFile--;
+                                row1.remove();
+                            }else{
+                                console.log(data.result);
+                            }
+                        }
+                    });
+                });
+                countFile++;
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function(){
+            document.getElementById('startDate').valueAsDate = new Date();
+            document.getElementById('endDate').valueAsDate = new Date();
+            $("form#myForm").submit(function(){
+                let startDate = $("#startDate").val();
+                let startHour = $("#startHour").val();
+                console.log(startDate+"Z"+startHour+":00");
+                let endDate = $("#endDate").val();
+                let endHour = $("#endHour").val();
+                console.log(endDate+"Z"+endHour+":00");
+                let rStart = $("#dominionResolution").val();
+                let rEnd = rStart;
+                console.log(rStart+" "+ rEnd);
+                let startDateSplit = startDate.split("-");
+                let yStart = startDateSplit[0];
+                let mStart = startDateSplit[1];
+                let dStart = startDateSplit[2];
+                let endDateSplit = endDate.split("-");
+                let yEnd = endDateSplit[0];
+                let mEnd = endDateSplit[1];
+                let dEnd = endDateSplit[2];
+                let sDate = new Date(yStart,mStart,dStart,startHour);
+                let eDate = new Date(yEnd,mEnd,dEnd,endHour);
+                if(sDate > eDate){
+                    console.log("wrong time interval entered");
+                    resultFailure2();
+                    return;
+                }
+                $("#myModal1").modal("show");
+                $.ajax({
+                    url: "{{url_for("csvCreationRequest")}}",
+                    type: 'POST',
+                    data:{"startDate":startDate,"startHour":startHour,"endDate":endDate,"endHour":endHour,"rStart":rStart,"rEnd":rEnd},
+                    dataType: 'json',
+                    success: function(data1){
+                        console.log(data1);
+                        if(data1.result == "nofiles"){
+                            console.log("failure");
+                            resultFailure();
+                        }else if(data1.result == "files"){
+                            console.log("success");
+                            resultSuccessfully(data1.count);
+                            username = "{{session['username']}}";
+                            $.ajax({
+                                    url: "{{url_for("getFileCSV")}}",
+                                    type: 'POST',
+                                    data:{"username":username},
+                                    dataType: 'json',
+                                    success: function(data){
+                                       console.log(data);
+                                       console.log(data.result.length);
+                                       if(data.result.length > 0){
+                                           createNewRows(data);
+                                       }
+                                    }
+                            });
+                        }else if(data1.result == "error"){
+                            console.log("problem data");
+                            resultError();
+                        }else{
+                            console.log("problem DB");
+                            resultError1();
+                        }
+                    }
+                });
+            });
+            username = "{{session['username']}}";
+            console.log(username);
+            $.ajax({
+                    url: "{{url_for("getFileCSV")}}",
+                    type: 'POST',
+                    data:{"username":username},
+                    dataType: 'json',
+                    success: function(data){
+                       console.log(data);
+                       console.log(data.result.length);
+                       if(data.result.length > 0){
+                           createNewRows(data);
+                       }
+                    }
+            });
+        });
+    </script>
+    <script>
+        function resultSuccessfully(count){
+            let htmlContent = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                '<strong>' + count + ' file/s have been uploaded successfully</strong>'+'' +
+                   '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>'
+                +'</button></div>'
+            let info = document.getElementById("infoResult");
+            info.innerHTML = htmlContent;
+        }
+        function resultFailure(){
+            let htmlContent = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'
+              + '<strong>there are no files </strong>'
+              + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+              +  '<span aria-hidden="true">&times;</span>'
+              + '</button>'
+              +  '</div>';
+            let info = document.getElementById("infoResult");
+            info.innerHTML = htmlContent;
+        }
+        function resultFailure2(){
+            let htmlContent = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'
+              + '<strong>Wrong time interval entered</strong>'
+              + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+              +  '<span aria-hidden="true">&times;</span>'
+              + '</button>'
+              +  '</div>';
+            let info = document.getElementById("infoResult");
+            info.innerHTML = htmlContent;
+        }
+        function resultError(){
+            let htmlContent = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'
+              + '<strong>Problem DB or File</strong>'
+              + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+              +  '<span aria-hidden="true">&times;</span>'
+              + '</button>'
+              +  '</div>';
+            let info = document.getElementById("infoResult");
+            info.innerHTML = htmlContent;
+        }
+        function resultError1(){
+            let htmlContent = '<div class="alert alert-danger alert-dismissible fade show" role="alert">'
+              + '<strong>There is/are polygon without labels or the DB has no Polygons </strong>'
+              + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+              +  '<span aria-hidden="true">&times;</span>'
+              + '</button>'
+              +  '</div>';
+            let info = document.getElementById("infoResult");
+            info.innerHTML = htmlContent;
+        }
+    </script>
+  </body>
+</html>
