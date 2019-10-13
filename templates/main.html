@@ -126,11 +126,12 @@
 <body>
 <ul id="myUl1">
     {% if data.flag == "true" %}
-        <li class="myLi1" style="text-align: center;color:white;border-right: 1px solid white;"><img  class="img1"src="{{url_for('static',filename='img/ccmmma_logo3_web.png')}}" alt="METEO UNIPARTHENOPE"></li>
+        <li class="myLi1" style="text-align: center;color:white;border-right: 1px solid white;"><a href="{{url_for('login')}}"><img  class="img1" src="{{url_for('static',filename='img/ccmmma_logo3_web.png')}}" alt="METEO UNIPARTHENOPE"></a></li>
     {% endif %}
     <li class="myLi1" style="text-align: center;color:white;background-color:#39748e;border-right: 1px solid white;pointer-events: none;
 " ><a href="/" class="myA1">{{session['username']}}</a></li>
-    <li style="" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
+    <li style="border-right: 1px solid white;" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
+    <li style="" class="myLi1"><a class="myA1 active1" href="{{url_for('CSVcreation')}}">CSV</a></li>
     <li class="myLi1" style="float:right;"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
     <li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" title="Reload page with same date"  href="javascript:sameDate(map.map.ncepDate);" style="background-color:#17a2b8 !important;"><i class="fa fa-bell" aria-hidden="true"></i>
 </a></li>
