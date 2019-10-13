@@ -40,7 +40,7 @@ for example you could type this command:
 - quit()
 - vi views.py
 
-12. insert your path where there are netCDF file in myfunction.py --> localPath = "<insert your path where there are netCDF file>"
+12. insert your path where there are your netCDF files in myfunction.py --> localPath = "<insert your path where there are netCDF file>"
  
 13. install server redis; for example for Ubuntu OS:
 
