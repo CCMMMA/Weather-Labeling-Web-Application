@@ -8,7 +8,7 @@ from wtforms import form, fields, Form, BooleanField, StringField, PasswordField
 from flask_admin.model.fields import InlineFormField, InlineFieldList
 from flask_admin import Admin, BaseView, expose
 from werkzeug.security import generate_password_hash,check_password_hash
-
+import os
 
 class UserForm(form.Form):
     name = fields.StringField('name',[validators.required(), validators.length(max=30)])
@@ -32,6 +32,15 @@ class UserView(ModelView):
             print("Error DB",str(e))
         password = model.get('password')
         model['password'] = generate_password_hash(password, method='pbkdf2:sha256')
+        username = model.get('username')
+        print(os.getcwd())
+        dirName = "static/user_files/"+username
+        print(dirName)
+        if not os.path.exists(dirName):
+            os.mkdir(dirName)
+            print("Directory ", dirName, " Created ")
+        else:
+            print("Directory ", dirName, " already exists")
 
     def on_model_delete(self,model):
         username = model.get('username')
