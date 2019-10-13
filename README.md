@@ -48,5 +48,5 @@ for example you could type this command:
 - sudo apt install redis-server
 
 13. flask run --host 0.0.0.0  --port 5555
-14. In another terminal in same path lauch this command: celery -A app.celery worker -l info
+14. In another terminal in same path you lauch this command: celery -A app.celery worker -l info
 15. If you wanted to remove "Uniparthenope" logo you would set flag = false in view.py in function index
