@@ -1,19 +1,26 @@
 """This file allows to manage the web site and web page server-side"""
-
-from myfunction import *
-import datetime
-import os
-from shapely.geometry import Polygon
-
+from celeryConfig import *
+from worker import *
+import glob
+import time
+import stat
 #these values allows to insert the default labels
 flag = False
 count12 = 0
+data = {'flag': 'true'}
 
+#creation new Flask's components
 app = Flask(__name__)
 app.secret_key = 'Your_secret_string'
 admin = Admin(app,"Admin Area")
 admin.add_view(UserView(managedb.db.UserCollection,"User Management"))
-data = {'flag': 'true'}
+app.config.update(
+    CELERY_BROKER_URL = 'redis://localhost:6379',
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+)
+celery = make_celery(app)
+
+
 
 @app.route("/")
 def index():
@@ -49,8 +56,6 @@ def main():
             return redirect(url_for('index'))
     return redirect(url_for('index'))
 
-
-
 @app.route("/home")
 def home():
     """This functions allows to access to user management page"""
@@ -61,6 +66,21 @@ def home():
             if count1 == 0:
                 return redirect(url_for('index'))
             return render_template('/admin/index.html')
+        except Exception as e:
+            print("Error DB:",str(e))
+            return redirect(url_for('index'))
+    return redirect(url_for('index'))
+
+@app.route("/CSVcreation")
+def CSVcreation():
+    """This functions allows to access to page for the creation of csv"""
+    if "logged_in" in session and session["logged_in"] == True:
+        print("User login", session["username"])
+        try:
+            count1 = managedb.getCountLoginDB(session["username"])
+            if count1 == 0:
+                return redirect(url_for('index'))
+            return render_template('CSVcreation.html',data=data)
         except Exception as e:
             print("Error DB:",str(e))
             return redirect(url_for('index'))
@@ -136,7 +156,7 @@ def listClassPolygon():
     if request.is_xhr and request.method=="POST":
         try:
             dateold = request.form['dateStr']
-            datenew = datetime.datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
+            datenew = datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
             #print("Individuare classi di Polygon con datetime : ", str(datenew))
             result, cursorListClassPolygon = managedb.groupByClassPolygonDB(datenew)
             if (result == False):
@@ -163,7 +183,7 @@ def insertStorm():
         #print("Polygon da inserire con datetime: ",polygonGeoJson['properties']['dateStr'])
         #modifica data in stringa in datatime
         dateold = polygonGeoJson['properties']['dateStr']
-        datenew = datetime.datetime(int(dateold[0:4]),int(dateold[4:6]),int(dateold[6:8]),int(dateold[9:11]))
+        datenew = datetime(int(dateold[0:4]),int(dateold[4:6]),int(dateold[6:8]),int(dateold[9:11]))
         polygonGeoJson['properties']['dateStr'] = datenew
         #print("data nuova:",str(polygonGeoJson['properties']['dateStr']))
         polygonGeoJson["properties"]["name"] = polygonGeoJson["properties"]["name"].upper()
@@ -247,7 +267,7 @@ def listStormOnDate():
     """This function allows to ask the db for polygons' list of specific date"""
     if request.is_xhr and request.method=="POST":
         dateold = request.form['dateStr']
-        datenew = datetime.datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
+        datenew = datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
         print("Request Polygon list with datetime: ",str(datenew))
         try:
             result,cursorListPolygon = managedb.listPolygonOnDateDB(datenew)
@@ -340,7 +360,7 @@ def countPolygon():
     if request.is_xhr and request.method=="POST":
         dateold = request.form["dateStr"]
         print(dateold)
-        datenew = datetime.datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
+        datenew = datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
         try:
             count = managedb.countPolygonDB(datenew)
             return json.dumps({"result": "correct","count": str(count)})
@@ -393,7 +413,7 @@ def listPointClusterOnDate():
     """This function asks the db for clusters' points list of specific date"""
     if request.is_xhr and request.method=="POST":
         dateold = request.form['dateStr']
-        datenew = datetime.datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
+        datenew = datetime(int(dateold[0:4]), int(dateold[4:6]), int(dateold[6:8]), int(dateold[9:11]))
         #print("Individuare i Point Cluster con datetime", str(datenew))
         try:
             result, cursorListPointCluster = managedb.listPointClusterOnDateDB(datenew)
@@ -424,3 +444,118 @@ def listClassCluster():
         except Exception as e:
             print("exception error DB", str(e))
             return json.dumps({"result": "error"})
+
+@app.route('/csvCreationRequest',methods=["GET","POST"])
+def csvCreationRequest(): #rStart,rEnd,yStart,mStart,dStart,hStart,yEnd,mEnd,dEnd,hEnd
+    """This method allows to generate csv file of netCDF"""
+    if request.is_xhr and request.method=="POST":
+        startDate = request.form["startDate"]
+        startDate = startDate.split("-")
+        yStart = startDate[0]
+        mStart = startDate[1]
+        dStart = startDate[2]
+        hStart = request.form["startHour"]
+        endDate = request.form["endDate"]
+        endDate = endDate.split("-")
+        yEnd = endDate[0]
+        mEnd = endDate[1]
+        dEnd = endDate[2]
+        hEnd = request.form["endHour"]
+        rStart =request.form["rStart"]
+        rEnd = request.form["rEnd"]
+        print(rStart,rEnd,yStart,mStart,dStart,hStart,yEnd,mEnd,dEnd,hEnd)
+        result = pointInPolygon(session["username"],int(rStart),int(rEnd),int(yStart),int(mStart),int(dStart),int(hStart),int(yEnd), int(mEnd), int(dEnd), int(hEnd))
+        countTot = result
+        if countTot == -1:
+            return json.dumps({"result": "error"})
+        if countTot == None:
+            return json.dumps({"result": "error1"})
+        if countTot == 0:
+            return json.dumps({"result": "nofiles","count":str(countTot)})
+        else:
+            return json.dumps({"result": "files","count":str(countTot)})
+
+@app.route('/getFileCSV',methods=["GET","POST"])
+def getFileCSV():
+    """This function asks the db for clusters' classes list"""
+    if request.is_xhr and request.method=="POST":
+        username = request.form["username"]
+        print(username)
+        pathname = "static/user_files/"+username+"/*.csv"
+        files = glob.glob(pathname)
+        files1 = []
+        info1 = []
+        for i in range(0,len(files)):
+            pre, ext = os.path.splitext(os.path.basename(urlparse.urlsplit(files[i]).path))
+            print(files[i])
+            file_stats = os.stat(files[i])
+            #print(file_stats)
+            f_ct = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(file_stats[stat.ST_CTIME]))
+            print(f_ct)
+            file = pre+ext
+            print(file)
+            file_info ={"filename":file,"f_ct":f_ct}
+            files1.append(file_info)
+        return json.dumps({"result": files1})
+
+@app.route('/deleteFileCSV',methods=["GET","POST"])
+def deleteFileCSV():
+    if request.is_xhr and request.method=="POST":
+        path1 = request.form["path"]
+        print(path1)
+        try:
+            if os.path.exists(path1):
+                os.remove(path1)
+                print("removed")
+                return json.dumps({"result": "removed"})
+            else:
+                print("The file does not exist")
+                return json.dumps({"result": "doesnotexist"})
+        except Exception as e:
+            print("Error File:", str(e))
+            json.dumps({"result": "problemFile"})
+
+@celery.task()
+def wrapWorkerUrl(username,url):
+    result = workerUrl(username, url)
+    return result
+
+@celery.task()
+def wrapWorkerNcFile(username,ncfile):
+    result = workerNcfile(username, ncfile)
+    return result
+
+def pointInPolygon(username, rStart, rEnd, yStart, mStart, dStart, hStart, yEnd, mEnd, dEnd, hEnd):
+    print("Process start")
+    print(rStart, rEnd, yStart, mStart, dStart, hStart, yEnd, mEnd, dEnd, hEnd)
+    try:
+            mytool = MyTools()
+            managedb = ManageDB()
+            if mytool.validityCheckDB(managedb):
+
+                # resolution, start date, end date
+                ncfiles, urls = mytool.getUrls(rStart, rEnd, yStart, mStart, dStart, hStart, yEnd, mEnd, dEnd, hEnd)
+                print("------------------------------------------------------------------------------------")
+                print("number of file in local storage:", len(ncfiles), "number of file in internet:", len(urls))
+                # p = multiprocessing.Pool(processes=nThreads)
+                print("------------------------------------------------------------------------------------")
+                print("Start scan files online")
+                # p.map(workerUrls, urls)
+                for i in range(0, len(urls)):
+                    result = wrapWorkerUrl.delay(username, urls[i])
+                    print("celery workerUrl",result.wait())
+                print("------------------------------------------------------------------------------------")
+                print("Start scan files in local storage")
+                # The software divides the analysis of netCDF files amoung threads
+                # p.map(workerNcfile, ncfiles)
+                for i in range(0, len(ncfiles)):
+                    result = wrapWorkerNcFile.delay(username, ncfiles[i])
+                    print("celery workerNcFile",result.wait())
+                countFiles = len(ncfiles) + len(urls)
+                return countFiles
+            countFiles = None
+            return countFiles
+    except Exception as e:
+            print("Error DB or File:", str(e))
+            countFiles = -1
+            return countFiles
