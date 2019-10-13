@@ -4,6 +4,8 @@ from myfunction import *
 from netCDF4 import Dataset
 import urlparse
 import csv
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as po
 from matplotlib.collections import PatchCollection
