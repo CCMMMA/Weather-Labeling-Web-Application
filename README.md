@@ -6,7 +6,7 @@ A) cloud,
 B) temperature at 2m,
 C) rain,
 D) snow,
-e) wind.
+E) wind.
 
 These data are provided thanks to ajax calls in the meteo-uniparthenope library: this library belogs to "Università degli studi di Napoli Parthenope".
 
