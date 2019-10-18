@@ -738,9 +738,18 @@ function onEachFeature(f, l) {
                         //This button allows to add a new label
                         let flag12 = false;
                         let label = prompt($(this).text());
+                        if(label == null){
+                            console.log("value "+ label);
+                            return;
+                        }
+                        if(label == ""){
+                            console.log("value "+ label);
+                            return;
+                        }
                         label = label.toUpperCase();
                         label = label.trim();
-                        //console.log(label);
+                        console.log(label);
+
                         for (let i = 0; i < data111.length; i++) {
                             if (label == data111[i].labelName.toUpperCase()) {
                                 console.log("Element already exists");
