@@ -8,7 +8,7 @@ C) rain,
 D) snow,
 E) wind.
 
-These data are provided thanks to ajax calls in the meteo-uniparthenope library: this library belogs to "Università degli studi di Napoli Parthenope".
+These data are provided thanks to ajax calls in the meteo-uniparthenope library: this library belogs to "Università degli studi di Napoli Parthenope". If you wanted to insert clusters' Points into DB, you'd install https://github.com/rosario-riccio/CSVtoPoint
 
 Configuration:
 
