@@ -4,6 +4,7 @@ from worker import *
 import glob
 import time
 import stat
+import operator
 #these values allows to insert the default labels
 flag = False
 count12 = 0
@@ -496,6 +497,9 @@ def getFileCSV():
             print(file)
             file_info ={"filename":file,"f_ct":f_ct}
             files1.append(file_info)
+        print(files1)
+        files1.sort(key=operator.itemgetter("f_ct"))
+        print(files1)
         return json.dumps({"result": files1})
 
 @app.route('/deleteFileCSV',methods=["GET","POST"])
