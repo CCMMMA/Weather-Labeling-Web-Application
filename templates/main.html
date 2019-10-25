@@ -57,7 +57,7 @@
         .legend111{
             line-height: 18px;
             color: #555;
-            opacity: 0.5%;
+
             background: rgba(255,255,255,0.8);
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
             border-radius: 5px;
@@ -72,7 +72,7 @@
             height: 18px;
             float: left;
             margin-right: 8px;
-            opacity: 0.7;
+
         }
         #mapmap-container,#mapmap-container-mapid{
             height: 70vh !important;
@@ -133,7 +133,7 @@
     <li style="border-right: 1px solid white;" class="myLi1"><a class="myA1 active1" href="/admin">Home</a></li>
     <li style="" class="myLi1"><a class="myA1 active1" href="{{url_for('CSVcreation')}}">CSV</a></li>
     <li class="myLi1" style="float:right;"><a class="active1 myA1" href="{{url_for('logout')}}">Logout</a></li>
-    <li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" title="Reload page with same date"  href="javascript:sameDate(map.map.ncepDate);" style="background-color:#17a2b8 !important;"><i class="fa fa-bell" aria-hidden="true"></i>
+    <li class="myLi1" style="float:right;text-align: center;"><a class="active1 myA1 active2" title="Reload page with same date"  href="javascript:sameDate(map.map.ncepDate);" style="background-color:#17a2b8 !important;"><i class="fa fa-refresh" aria-hidden="true"></i>
 </a></li>
 
 </ul>
@@ -869,7 +869,7 @@ function updateMap(localPlace,localDate){
     removeActive = false;
     map=jQueryProtect("#map").MeteoUniparthenopeMap(localPlace,localDate,{ "noPopup":false, "mapName":_mapName,"baseLink":"https://meteo.uniparthenope.it/product_dashboard/dashboard?"});
     //console.log("DATA 2 "+ map.myDate);
-    var interval1 = setInterval(function() {
+    {#var interval1 = setInterval(function() {
             $.ajax({
                     url:"{{url_for("countPolygon")}}",
                     method:"POST",
@@ -890,7 +890,7 @@ function updateMap(localPlace,localDate){
                         }
                     }
             });
-    }, 30000);
+    }, 30000);#}
     {% if session.role == 'ADMIN' %}
         map.map.pm.addControls({
             position: 'topleft',
