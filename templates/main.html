@@ -247,6 +247,7 @@ function onEachFeature(f, l) {
             method:"POST",
             data:{"id":f.properties.idDB},
             dataType:"json",
+            async:false,
             success:function(data) {
                 if (data.result != "error" && data.result != "empty") {
                     //console.log(data);
@@ -832,7 +833,6 @@ function onEachFeature(f, l) {
                                         $("select#" + id + " option").each(function () {
                                             //console.log(this);
                                             let a = $(this).val();
-
                                             if (label1[i] == a) {
                                                 //console.log("element already exists");
                                                 flag10 = true;
