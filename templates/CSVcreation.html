@@ -158,8 +158,8 @@
                 </select>
               </div>
               <div class="form-group">
-                <label style="margin-left: 15px" for="dominionResolution">Dominion resolution: </label>
-                <select style="margin-left: 5px;margin-right: 5px;" class="form-control form-control-sm" name="dominionResolution" id="dominionResolution">
+                <label style="margin-left: 15px" for="domainResolution">Domain resolution: </label>
+                <select style="margin-left: 5px;margin-right: 5px;" class="form-control form-control-sm" name="domainResolution" id="domainResolution">
                   <option value="1" selected="selected">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -270,7 +270,7 @@
                 let endDate = $("#endDate").val();
                 let endHour = $("#endHour").val();
                 console.log(endDate+"Z"+endHour+":00");
-                let rStart = $("#dominionResolution").val();
+                let rStart = $("#domainResolution").val();
                 let rEnd = rStart;
                 console.log(rStart+" "+ rEnd);
                 let startDateSplit = startDate.split("-");
