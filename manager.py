@@ -48,7 +48,7 @@ class UserView(ModelView):
             count1 = managedb.getCountLoginDB(session["username"])
             if count1 == 0:
                 session.clear()
-            managedb.deletePolygonDBonUsername(username)
+            #managedb.deletePolygonDBonUsername(username)
         except Exception as e:
             session.clear()
             print("Error DB",str(e))
