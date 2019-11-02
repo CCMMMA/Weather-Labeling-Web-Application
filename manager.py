@@ -34,7 +34,7 @@ class UserView(ModelView):
         model['password'] = generate_password_hash(password, method='pbkdf2:sha256')
         username = model.get('username')
         print(os.getcwd())
-        dirName = "static/user_files/"+username
+        dirName = "z/user_files/"+username
         print(dirName)
         if not os.path.exists(dirName):
             os.mkdir(dirName)
