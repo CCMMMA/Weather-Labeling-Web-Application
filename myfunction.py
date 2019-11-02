@@ -11,7 +11,6 @@ localPath = "<insert your path where there are netCDF file>"
 
 url = "http://193.205.230.6:8080/opendap/hyrax/opendap/wrf5"
 
-
 class MyTools(object):
 
     def modifyLabelJSON(self,cursorListLabel):
@@ -144,16 +143,16 @@ class MyTools(object):
                 localPath2 = localPath1 + "/" + fname
                 print(localPath2)
                 if not os.path.isfile(localPath2):
-                    print("file non presente in locale: " + fname)
+                    print("file isn't in local: " + fname)
                     try:
                         nc = Dataset(url1)
                         nc.close()
                         urls.append(url1)
-                        print("file presente online: " + fname)
+                        print("file is online: " + fname)
                     except Exception as e:
-                        print("file non presente online")
+                        print("file isn't online")
                 else:
-                    print("file presente in locale: " + fname)
+                    print("file is in local: " + fname)
                     ncfiles.append(localPath2)
         return ncfiles,urls
 
