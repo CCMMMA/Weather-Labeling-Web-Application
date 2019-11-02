@@ -33,7 +33,7 @@ def workerUrl(username,url):
         print("resolution d03")
         resolution = "d03"
     else:
-        sys.exit(0)
+        return False
     dirName = "static/user_files/" + username
     print(dirName)
     if not os.path.exists(dirName):
@@ -52,14 +52,18 @@ def workerUrl(username,url):
     print(pathCSVFile)
     print(pathCSVFileDef)
     with open(pathCSVFile, "w") as f:
-        fieldnames = ["j","i","T2C","SLP", "WSPD10","WDIR10","RH2","UH","MCAPE","TC500","TC850","GPH500", "GPH850","CLDFRA_TOTAL","U10M","V10M","DELTA_WSPD10", "DELTA_WDIR10","DELTA_RAIN","resolution", "type"]
+        fieldnames = ["LONGITUDE","LATITUDE","T2C","SLP", "WSPD10","WDIR10","RH2","UH","MCAPE","TC500","TC850","GPH500", "GPH850","CLDFRA_TOTAL","U10M","V10M","DELTA_WSPD10", "DELTA_WDIR10","DELTA_RAIN","resolution", "type"]
         writer1 = csv.DictWriter(f,extrasaction='ignore', fieldnames=fieldnames)
         writer1.writeheader()
-        pointX = []
-        pointY = []
-        polygonX = []
-        polygonY = []
-        nc = Dataset(url, "r")
+        #pointX = []
+        #pointY = []
+        #polygonX = []
+        #polygonY = []
+        try:
+            nc = Dataset(url, "r")
+        except Exception as e:
+            print("Error: there isn't nc file online", str(e))
+            return False
         hours1 = int(nc.variables["time"][0])
         date1 = datetime(1900, 1, 1) + timedelta(hours=hours1)
         print("date of file :",date1)
@@ -94,14 +98,12 @@ def workerUrl(username,url):
                         if (polygons[k].contains(pt)):
                             flag = True
                             count = count + 1
-                            pointX.append(lng)
-                            pointY.append(lat)
-                            print("count {}) lng: {} | lat: {} | type: {}".format(count, nc.variables["longitude"][i],
-                                                                                  nc.variables["latitude"][j],
-                                                                                  typePolygons[k]))
+                            #pointX.append(lng)
+                            #pointY.append(lat)
+                            print("count {}) lng: {} | lat: {} | type: {}".format(count, lng,lat,typePolygons[k]))
                             #writer1.writerow({"type": typePolygons[k]})
-                            writer1.writerow({"j": j,
-                                              "i": i,
+                            writer1.writerow({"LONGITUDE":lng,
+                                              "LATITUDE":lat,
                                               "T2C": nc.variables["T2C"][0][j][i],
                                               "SLP": nc.variables["SLP"][0][j][i],
                                               "WSPD10": nc.variables["WSPD10"][0][j][i],
@@ -124,8 +126,8 @@ def workerUrl(username,url):
 
                     if (not flag):
                         #writer1.writerow({"type": 0})
-                        writer1.writerow({"j": j,
-                                          "i": i,
+                        writer1.writerow({"LONGITUDE":lng,
+                                          "LATITUDE":lat,
                                           "T2C": nc.variables["T2C"][0][j][i],
                                           "SLP": nc.variables["SLP"][0][j][i],
                                           "WSPD10": nc.variables["WSPD10"][0][j][i],
@@ -156,10 +158,12 @@ def workerUrl(username,url):
             #print(len(nc.variables['latitude']))
             for i in range(0, len(nc.dimensions['longitude'])):
                 for j in range(0, len(nc.dimensions['latitude'])):
+                    lng = nc.variables["longitude"][i]
+                    lat = nc.variables["latitude"][j]
                     count1 = count1 + 1
                     #writer1.writerow({"type": 0})
-                    writer1.writerow({"j": j,
-                                      "i": i,
+                    writer1.writerow({"LONGITUDE":lng,
+                                      "LATITUDE":lat,
                                       "T2C": nc.variables["T2C"][0][j][i],
                                       "SLP": nc.variables["SLP"][0][j][i],
                                       "WSPD10": nc.variables["WSPD10"][0][j][i],
@@ -213,7 +217,7 @@ def workerNcfile(username,ncfile):
         print("resolution d03")
         resolution = "d03"
     else:
-        sys.exit(0)
+        return False
 
     dirName = "static/user_files/" + username
     print(dirName)
@@ -233,17 +237,18 @@ def workerNcfile(username,ncfile):
     print(pathCSVFile)
     print(pathCSVFileDef)
     with open(pathCSVFile, "w") as f:
-        # fieldnames = ["longitude", "latitude", "HOURLY_SWE", "DELTA_RAIN", "DAILY_RAIN", "T2C", "RH2", "UH",
-        #               "MCAPE", "TC500", "TC850", "GPH500", "GPH850", "SLP", "CLDFRA_TOTAL", "U10M", "V10M", "WSPD10",
-        #               "WDIR10", "DELTA_WSPD10", "DELTA_WDIR10", "resolution", "type"]
-        fieldnames = ["j","i","T2C","SLP", "WSPD10","WDIR10","RH2","UH","MCAPE","TC500","TC850","GPH500", "GPH850","CLDFRA_TOTAL","U10M","V10M","DELTA_WSPD10", "DELTA_WDIR10","DELTA_RAIN","resolution", "type"]
+        fieldnames = ["LONGITUDE","LATITUDE","T2C","SLP", "WSPD10","WDIR10","RH2","UH","MCAPE","TC500","TC850","GPH500", "GPH850","CLDFRA_TOTAL","U10M","V10M","DELTA_WSPD10", "DELTA_WDIR10","DELTA_RAIN","resolution", "type"]
         writer1 = csv.DictWriter(f, extrasaction='ignore',fieldnames=fieldnames)
         writer1.writeheader()
-        pointX = []
-        pointY = []
-        polygonX = []
-        polygonY = []
-        nc = Dataset(ncfile, "r")
+        #pointX = []
+        #pointY = []
+        #polygonX = []
+        #polygonY = []
+        try:
+            nc = Dataset(ncfile, "r")
+        except Exception as e:
+            print("Error: there isn't nc file in local", str(e))
+            return False
         hours1 = int(nc.variables["time"][0])
         date1 = datetime(1900, 1, 1) + timedelta(hours=hours1)
         print("date of file:",date1)
@@ -277,14 +282,12 @@ def workerNcfile(username,ncfile):
                         if (polygons[k].contains(pt)):
                             flag = True
                             count = count + 1
-                            pointX.append(lng)
-                            pointY.append(lat)
-                            print("count {}) lng: {} | lat: {} | type: {}".format(count, nc.variables["longitude"][i],
-                                                                                  nc.variables["latitude"][j],
-                                                                                  typePolygons[k]))
-                            #writer1.writerow({"type": typePolygons[k]})
-                            writer1.writerow({"j": j,
-                                              "i": i,
+                            #pointX.append(lng)
+                            #pointY.append(lat)
+                            print("count {}) lng: {} | lat: {} | type: {}".format(count, lng,lat,typePolygons[k]))
+                            #writer1.writerow({"LONGITUDE":lng,"LATITUDE":lat,"type": typePolygons[k]})
+                            writer1.writerow({"LONGITUDE":lng,
+                                              "LATITUDE":lat,
                                               "T2C": nc.variables["T2C"][0][j][i],
                                               "SLP": nc.variables["SLP"][0][j][i],
                                               "WSPD10": nc.variables["WSPD10"][0][j][i],
@@ -307,8 +310,8 @@ def workerNcfile(username,ncfile):
 
                     if (not flag):
                         #writer1.writerow({"type": 0})
-                        writer1.writerow({"j": j,
-                                          "i": i,
+                        writer1.writerow({"LONGITUDE":lng,
+                                          "LATITUDE":lat,
                                           "T2C": nc.variables["T2C"][0][j][i],
                                           "SLP": nc.variables["SLP"][0][j][i],
                                           "WSPD10": nc.variables["WSPD10"][0][j][i],
@@ -339,10 +342,12 @@ def workerNcfile(username,ncfile):
             #print(len(nc.variables['latitude']))
             for i in range(0, len(nc.dimensions['longitude'])):
                 for j in range(0, len(nc.dimensions['latitude'])):
+                    lng = nc.variables["longitude"][i]
+                    lat = nc.variables["latitude"][j]
                     count1 = count1 + 1
                     #writer1.writerow({"type": 0})
-                    writer1.writerow({"j": j,
-                                      "i": i,
+                    writer1.writerow({"LONGITUDE":lng,
+                                      "LATITUDE":lat,
                                       "T2C": nc.variables["T2C"][0][j][i],
                                       "SLP": nc.variables["SLP"][0][j][i],
                                       "WSPD10": nc.variables["WSPD10"][0][j][i],
