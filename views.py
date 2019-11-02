@@ -483,7 +483,7 @@ def getFileCSV():
         username = request.form["username"]
         print(username)
         pathname = "static/user_files/"+username+"/*.csv"
-        files = glob.glob(pathname)
+        files = sorted(glob.glob(pathname), key=os.path.getmtime)
         files1 = []
         info1 = []
         for i in range(0,len(files)):
@@ -498,8 +498,8 @@ def getFileCSV():
             file_info ={"filename":file,"f_ct":f_ct}
             files1.append(file_info)
         print(files1)
-        files1.sort(key=operator.itemgetter("f_ct"))
-        print(files1)
+        #files1.sort(key=operator.itemgetter("f_ct"))
+        #print(files1)
         return json.dumps({"result": files1})
 
 @app.route('/deleteFileCSV',methods=["GET","POST"])
