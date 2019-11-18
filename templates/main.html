@@ -1022,15 +1022,18 @@ function updateMap(localPlace,localDate){
                    layerControl1.addTo(map.map);
                    //console.log("cl1 :" + clusterGroup1.hasLayer());
                     for (let key in groupPolygon) {
-                        groupPolygon[key]["group"].addTo(map.map);
-                        let a = groupPolygon[key]["name"];
-                        if(a == ""){
-                            a = "NO LABEL".toUpperCase();
+                        if(groupPolygon[key].count > 0 ){
+                            groupPolygon[key]["group"].addTo(map.map);
+                            let a = groupPolygon[key]["name"];
+                            if(a == ""){
+                                a = "NO LABEL".toUpperCase();
+                            }
+                            //console.log(a + " " + groupPolygon[key].count);
+                            let b = groupPolygon[key]["count"];
+                            let c = groupPolygon[key]["group"]._leaflet_id;
+                            let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
+                            layerControl1.addOverlay(groupPolygon[key]["group"], name1);
                         }
-                        let b = groupPolygon[key]["count"];
-                        let c = groupPolygon[key]["group"]._leaflet_id;
-                        let name1 = "<span id='" + c + "' name='" + a + "'>" + a + "</span>";
-                        layerControl1.addOverlay(groupPolygon[key]["group"], name1);
                     }
                 }
             }
