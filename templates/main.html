@@ -1,3 +1,4 @@
+<!--main.html-->
 <!--This file represents the main page, in which is possible to manage and create polygons that track specific weather events:
 1) to create polygon
 2) to remove polygon
@@ -960,7 +961,7 @@ function updateMap(localPlace,localDate){
                     //console.log("classPolygon -i-");
                     //console.log(classPolygon[key]);
                     let a = {"name":classPolygon[key]._id.name,
-                        "count" : parseInt(classPolygon[key].count),
+                        "count" : 0,
                         "group":L.layerGroup()
                     };
                     //console.log(a);
@@ -1010,6 +1011,8 @@ function updateMap(localPlace,localDate){
                     for(let key1 in groupPolygon){
                         if(name == groupPolygon[key1]["name"]){
                             groupPolygon[key1]["group"].addLayer(a);
+                            groupPolygon[key1].count = groupPolygon[key1].count + 1;
+                            //console.log("polygon " + name +" n." + groupPolygon[key1].count);
                             //console.log(name + " " + groupPolygon[key1]["name"]);
                         }
                     }
